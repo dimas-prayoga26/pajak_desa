@@ -212,8 +212,6 @@ class WajibPajakController extends Controller
 
     public function datatable(Request $request)
     {
-        $tahun = $request->tahun ?? now()->year;
-
         $data = WajibPajak::with('user.biodata')->get();
         return datatables()->of($data)->make(true);
     }
@@ -274,25 +272,21 @@ class WajibPajakController extends Controller
         }
     }
 
-    public function detailTagihan(Request $request)
+    public function getByWajibPajak($id)
     {
-        $id = $request->id;
+        $wajib = WajibPajak::with('user.biodata')->findOrFail($id);
 
-        $tagihan = Tagihan::with(['wajibPajak.user.biodata'])
-            ->find($id);
-
-        if (!$tagihan) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Tagihan tidak ditemukan.'
-            ], 404);
-        }
+        $tagihans = $wajib->tagihans()
+            ->orderBy('tahun', 'desc')
+            ->get(['tahun', 'jumlah', 'status_bayar']);
 
         return response()->json([
             'status' => true,
-            'data' => $tagihan
+            'nama' => optional($wajib->user->biodata)->nama ?? $wajib->user->email,
+            'data' => $tagihans
         ]);
     }
+
     
 
 

@@ -239,33 +239,36 @@
       <div class="modal fade" id="modalDetail" tabindex="-1" aria-labelledby="modalDetailLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
           <div class="modal-content">
+      
             <div class="modal-header">
-              <h5 class="modal-title" id="modalDetailLabel">Detail Wajib Pajak</h5>
+              <h5 class="modal-title" id="modalDetailLabel">Detail Wajib Pajak: <span id="modalNamaUser"></span></h5>
               <button type="button" class="close" data-dismiss="modal">
                 <span>&times;</span>
               </button>
             </div>
+      
             <div class="modal-body">
               <table class="table table-bordered">
-                <tbody>
+                <thead>
                   <tr>
+                    <th>No.</th>
                     <th>Tahun</th>
-                    <td id="tahun"></td>
-                  </tr>
-                  <tr>
                     <th>Jumlah</th>
-                    <td id="jumlah"></td>
-                  </tr>
-                  <tr>
                     <th>Status Bayar</th>
-                    <td id="status_bayar"></td>
+                    <th>Aksi</th>
                   </tr>
+                </thead>
+                <tbody id="detailTagihanBody">
+                  <!-- Data akan diisi via JavaScript -->
                 </tbody>
               </table>
             </div>
+      
           </div>
         </div>
       </div>
+      
+      
       
 
     <!-- End -->
@@ -429,24 +432,39 @@
         });
 
         function lihatDetail(id) {
-            
-            $.ajax({
+            $.ajax({        
                 url: `/super-admin/detail-pajak/${id}`,
                 type: 'GET',
-                success: function(response) {
-                    let data = response.data;
-                    console.log(data);
+                success: function (response) {
+                    if (response.status) {
+                        $('#modalNamaUser').text(response.nama); // update judul modal
 
-                    $('#tahun').text(data.user?.biodata?.nama || '-');
-                    $('#jumlah').text(data.nop || '-');
-                    $('#status_bayar').html(data.status_bayar === 'dibayar'
-                        ? '<span class="badge badge-success">Sudah Dibayar</span>'
-                        : '<span class="badge badge-warning">Belum Dibayar</span>');
+                        let rows = '';
+                        response.data.forEach((tagihan, index) => {
+                            rows += `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>${tagihan.tahun}</td>
+                                    <td>Rp ${parseInt(tagihan.jumlah).toLocaleString('id-ID')}</td>
+                                    <td>
+                                        ${tagihan.status_bayar === 'dibayar'
+                                            ? '<span class="badge badge-success">Sudah Dibayar</span>'
+                                            : '<span class="badge badge-warning">Belum Dibayar</span>'}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info" onclick="lihatDetailTagihan(${tagihan.id})">
+                                            <i class="fa fa-eye"></i> Lihat Detail
+                                        </button>
+                                    </td>
+                                </tr>`;
+                        });
 
-                    $('#modalDetail').modal('show');
+                        $('#detailTagihanBody').html(rows);
+                        $('#modalDetail').modal('show');
+                    }
                 },
-                error: function() {
-                    toastr.error('Gagal mengambil detail data');
+                error: function () {
+                    toastr.error("Gagal mengambil data tagihan");
                 }
             });
         }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Tagihan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TagihanController extends Controller
 {
@@ -19,17 +20,7 @@ class TagihanController extends Controller
 
     public function index(Request $request)
     {
-        // $tahunList = WajibPajak::select('tahun')
-        //     ->distinct()
-        //     ->orderBy('tahun', 'desc')
-        //     ->pluck('tahun')
-        //     ->toArray();
-
-        // $tahunTerpilih = $request->tahun ?? now()->year;
-
-        // if (!in_array($tahunTerpilih, $tahunList)) {
-        //     array_unshift($tahunList, $tahunTerpilih);
-        // }
+        
 
         return view('dashboard.tagihan.index');
     }
@@ -98,7 +89,7 @@ class TagihanController extends Controller
 
             DB::beginTransaction();
 
-            $data = $this->detailTagihan->with('user.biodata')->find($id);
+            $data = $this->detailTagihan->with('wajibPajak.user.biodata')->find($id);
 
             DB::commit();
 
@@ -133,41 +124,33 @@ class TagihanController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'nop' => 'required|string|max:100',
-            'alamat' => 'required|string',
-            'luas_bumi' => 'required|numeric',
-            'luas_bangunan' => 'required|numeric',
+            'jumlah' => 'required|numeric',
         ]);
 
         try {
             DB::beginTransaction();
 
-            $this->detailTagihan->where("id", $id)->update([
-                "user_id" => $request->user_id,
-                "nop" => $request->nop,
-                "alamat" => $request->alamat,
-                "luas_bumi" => $request->luas_bumi,
-                "luas_bangunan" => $request->luas_bangunan,
+            // Update jumlah tagihan
+            Tagihan::where('id', $id)->update([
+                'jumlah' => $request->jumlah,
             ]);
 
             DB::commit();
 
             return response()->json([
-                "status" => true,
-                "message" => "Data berhasil diperbarui"
+                'status' => true,
+                'message' => 'Jumlah tagihan berhasil diperbarui'
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
             return response()->json([
-                "status" => false,
-                "message" => $e->getMessage()
+                'status' => false,
+                'message' => $e->getMessage()
             ], 500);
         }
     }
-
 
     /**
      * Remove the specified resource from storage.
@@ -207,32 +190,18 @@ class TagihanController extends Controller
 
     public function datatable(Request $request)
     {
-        $tahun = $request->tahun ?? now()->year;
+        if (!$request->filled('nop')) {
+            return datatables()->of([])->make(true);
+        }
 
-        $data = WajibPajak::with('user.biodata')->get();
-        return datatables()->of($data)->make(true);
-    }
-
-
-
-    public function getUserOptions(Request $request)
-    {
-        $search = $request->input('q');
-
-        $users = User::role('warga') // ⬅️ hanya ambil user dengan role warga
-            ->with('biodata')
-            ->whereHas('biodata', function ($query) use ($search) {
-                $query->where('nama', 'like', "%{$search}%");
-            })
-            ->get();
-
-        $formatted = $users->map(function ($user) {
-            return [
-                'id' => $user->id,
-                'nama' => optional($user->biodata)->nama ?? $user->email,
-            ];
+        $query = Tagihan::with('wajibPajak.user.biodata')
+        ->whereHas('wajibPajak', function ($q) use ($request) {
+            $q->where('nop', 'like', '%' . $request->nop . '%');
         });
 
-        return response()->json($formatted);
+            return datatables()->of($query)
+            ->addIndexColumn()
+            ->make(true);
+        
     }
 }
