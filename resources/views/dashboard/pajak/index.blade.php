@@ -432,42 +432,42 @@
         });
 
         function lihatDetail(id) {
-            $.ajax({        
-                url: `/super-admin/detail-pajak/${id}`,
-                type: 'GET',
-                success: function (response) {
-                    if (response.status) {
-                        $('#modalNamaUser').text(response.nama); // update judul modal
+        $.ajax({        
+            url: `/super-admin/detail-pajak/tagihan/${id}`,
+            type: 'GET',
+            success: function (response) {
+                if (response.status) {
+                    $('#modalNamaUser').text(response.nama); // update judul modal
 
-                        let rows = '';
-                        response.data.forEach((tagihan, index) => {
-                            rows += `
-                                <tr>
-                                    <td>${index + 1}</td>
-                                    <td>${tagihan.tahun}</td>
-                                    <td>Rp ${parseInt(tagihan.jumlah).toLocaleString('id-ID')}</td>
-                                    <td>
-                                        ${tagihan.status_bayar === 'dibayar'
-                                            ? '<span class="badge badge-success">Sudah Dibayar</span>'
-                                            : '<span class="badge badge-warning">Belum Dibayar</span>'}
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-sm btn-info" onclick="lihatDetailTagihan(${tagihan.id})">
-                                            <i class="fa fa-eye"></i> Lihat Detail
-                                        </button>
-                                    </td>
-                                </tr>`;
-                        });
+                    let rows = '';
+                    response.data.forEach((tagihan, index) => {
+                        rows += `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${tagihan.tahun}</td>
+                                <td>Rp ${parseInt(tagihan.jumlah).toLocaleString('id-ID')}</td>
+                                <td>
+                                    ${tagihan.status_bayar === 'dibayar'
+                                        ? '<span class="badge badge-success">Sudah Dibayar</span>'
+                                        : '<span class="badge badge-warning">Belum Dibayar</span>'}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="lihatDetailTagihan(${tagihan.id})">
+                                        <i class="fa fa-eye"></i> Lihat Detail
+                                    </button>
+                                </td>
+                            </tr>`;
+                    });
 
-                        $('#detailTagihanBody').html(rows);
-                        $('#modalDetail').modal('show');
-                    }
-                },
-                error: function () {
-                    toastr.error("Gagal mengambil data tagihan");
+                    $('#detailTagihanBody').html(rows);
+                    $('#modalDetail').modal('show');
                 }
-            });
-        }
+            },
+            error: function () {
+                toastr.error("Gagal mengambil data tagihan");
+            }
+        });
+    }
 
 
         function formatRupiah(angka, prefix) {

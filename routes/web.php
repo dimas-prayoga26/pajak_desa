@@ -24,7 +24,7 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         Route::get("/detail-pajak/datatable", [WajibPajakController::class, "datatable"])->name("detail-pajak.datatable");
-        Route::get('/detail-pajak/{id}', [WajibPajakController::class, 'getByWajibPajak'])->name("detail-pajak.getByWajibPajak");
+        Route::get('/detail-pajak/tagihan/{id}', [WajibPajakController::class, 'getByWajibPajak'])->name("detail-pajak.getByWajibPajak");
         Route::post("/detail-pajak/{id}/kirim", [WajibPajakController::class, "sendNotification"])->name("detail-pajak.notification");
         Route::get('/detail-pajak/user-options', [WajibPajakController::class, 'getUserOptions'])->name('detail-pajak.user-options');
         Route::resource("detail-pajak", WajibPajakController::class);

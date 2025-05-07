@@ -212,6 +212,8 @@ class WajibPajakController extends Controller
 
     public function datatable(Request $request)
     {
+        $tahun = $request->tahun ?? now()->year;
+
         $data = WajibPajak::with('user.biodata')->get();
         return datatables()->of($data)->make(true);
     }
@@ -222,13 +224,14 @@ class WajibPajakController extends Controller
     {
         $search = $request->input('q');
 
-        $users = User::role('warga') // ⬅️ hanya ambil user dengan role warga
+        $users = User::role('warga')
             ->with('biodata')
             ->whereHas('biodata', function ($query) use ($search) {
                 $query->where('nama', 'like', "%{$search}%");
             })
             ->get();
 
+        // dd($users)
         $formatted = $users->map(function ($user) {
             return [
                 'id' => $user->id,
