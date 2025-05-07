@@ -37,6 +37,8 @@
 
   <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet"/>
 
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+
 
   @yield('css')
 </head>
@@ -69,6 +71,7 @@
         </div>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
         <!-- jQuery -->
         <script src="plugins/jquery/jquery.min.js"></script>

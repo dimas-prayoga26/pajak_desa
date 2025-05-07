@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('biodatas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('nama');
             $table->string('alamat');
             $table->string('no_hp');
             $table->date('tanggal_lahir');

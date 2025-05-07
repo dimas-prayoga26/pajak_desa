@@ -24,18 +24,12 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         Route::get("/detail-pajak/datatable", [WajibPajakController::class, "datatable"])->name("detail-pajak.datatable");
+        Route::get('/detail-pajak/{id}', [WajibPajakController::class, 'detailTagihan'])->name("detail-pajak.detailTagihan");
+        Route::post("/detail-pajak/{id}/kirim", [WajibPajakController::class, "sendNotification"])->name("detail-pajak.notification");
+        Route::get('/detail-pajak/user-options', [WajibPajakController::class, 'getUserOptions'])->name('detail-pajak.user-options');
         Route::resource("detail-pajak", WajibPajakController::class);
 
         Route::get("/detail-tagihan/datatable", [TagihanController::class, "datatable"])->name("detail-tagihan.datatable");
         Route::resource("detail-tagihan", TagihanController::class);
     });
 });
-
-
-// Route::get('/', function () {
-//     return view('dashboard.index');
-// });
-
-// Route::get('dashboard', function () {
-//     return view('dashboard.index');
-// })->name('dashboard');

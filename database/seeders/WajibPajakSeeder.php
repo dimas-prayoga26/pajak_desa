@@ -23,7 +23,9 @@ class WajibPajakSeeder extends Seeder
                 'alamat' => 'Jl. Citra Nomor ' . rand(1, 100),
                 'luas_bumi' => rand(50, 150),
                 'luas_bangunan' => rand(30, 120),
+                // 'tahun' => rand(2021, 2025), // tahun acak
             ]);
         }
+
     }
 }

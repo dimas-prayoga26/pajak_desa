@@ -18,6 +18,8 @@ return new class extends Migration
             $table->text('alamat');              // Alamat lengkap
             $table->decimal('luas_bumi', 10, 2); // Luas tanah
             $table->decimal('luas_bangunan', 10, 2); // Luas bangunan
+            // $table->year('tahun');
+            $table->enum('status_bayar', ['belum', 'dibayar'])->default('belum'); // status tagihan
             $table->timestamps();
         });
     }
