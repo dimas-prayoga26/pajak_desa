@@ -38,6 +38,14 @@
               <p>Data Tagihan</p>
             </a>
           </li>
+
+          <li class="nav-item">
+            <a href="{{ route('user.index') }}" 
+               class="nav-link {{ Request::is('super-admin/user') ? 'active' : '' }}">
+              <i class="nav-icon fi fi-rr-users-alt"></i>
+              <p>Data user</p>
+            </a>
+          </li>
       
           <!-- Logout -->
           <li class="nav-item">

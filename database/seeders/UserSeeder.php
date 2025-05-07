@@ -22,7 +22,6 @@ class UserSeeder extends Seeder
         $admin = User::firstOrCreate(
             ['email' => 'admin@gmail.com'],
             [
-                'name' => 'Super Admin',
                 'username' => 'superadmin',
                 'password' => Hash::make('password'),
                 'photo' => null,
@@ -35,7 +34,6 @@ class UserSeeder extends Seeder
             $user = User::firstOrCreate(
                 ['email' => "warga{$i}@gmail.com"],
                 [
-                    'name' => "Warga {$i}",
                     'username' => "warga{$i}",
                     'password' => Hash::make('password'),
                     'photo' => null,

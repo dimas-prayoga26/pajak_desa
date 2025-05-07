@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TagihanController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\WajibPajakController;
 
 Route::group(["middleware" => ["guest"]], function() {
@@ -31,5 +32,8 @@ Route::middleware(['web', 'auth'])->group(function () {
 
         Route::get("/detail-tagihan/datatable", [TagihanController::class, "datatable"])->name("detail-tagihan.datatable");
         Route::resource("detail-tagihan", TagihanController::class);
+
+        Route::get("/user/datatable", [UserController::class, "datatable"])->name("user.datatable");
+        Route::resource("user", UserController::class);
     });
 });

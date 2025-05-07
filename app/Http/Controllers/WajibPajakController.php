@@ -212,9 +212,8 @@ class WajibPajakController extends Controller
 
     public function datatable(Request $request)
     {
-        $tahun = $request->tahun ?? now()->year;
-
         $data = WajibPajak::with('user.biodata')->get();
+
         return datatables()->of($data)->make(true);
     }
 
