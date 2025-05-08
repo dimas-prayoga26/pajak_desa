@@ -15,11 +15,12 @@
 
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
-      <li class="nav-item">
-        <a class="nav-link" data-widget="fullscreen" href="#" role="button">
-          <i class="fas fa-expand-arrows-alt"></i>
-        </a>
-      </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" role="button" style="cursor: default;">
+                <h5>Halo, Selamat Datang {{ Auth::user()->biodata->nama ?? Auth::user()->username }}</h5>
+            </a>
+        </li>
     </ul>
+  
   </nav>
   <!-- /.navbar -->

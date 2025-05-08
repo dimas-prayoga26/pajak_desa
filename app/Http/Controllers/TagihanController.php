@@ -190,18 +190,38 @@ class TagihanController extends Controller
 
     public function datatable(Request $request)
     {
-        if (!$request->filled('nop')) {
-            return datatables()->of([])->make(true);
-        }
+        $user = auth()->user();
 
-        $query = Tagihan::with('wajibPajak.user.biodata')
-        ->whereHas('wajibPajak', function ($q) use ($request) {
-            $q->where('nop', 'like', '%' . $request->nop . '%');
-        });
+        if ($user->hasRole('superAdmin')) {
+            // Superadmin harus input NOP untuk pencarian
+            if (!$request->filled('nop')) {
+                return datatables()->of([])->make(true);
+            }
+
+            $query = Tagihan::with('wajibPajak.user.biodata')
+                ->whereHas('wajibPajak', function ($q) use ($request) {
+                    $q->where('nop', 'like', '%' . $request->nop . '%');
+                });
 
             return datatables()->of($query)
-            ->addIndexColumn()
-            ->make(true);
-        
+                ->addIndexColumn()
+                ->make(true);
+        } 
+        elseif ($user->hasRole('warga')) {
+            // Warga langsung ambil data berdasarkan user yang login
+            $query = Tagihan::with('wajibPajak.user.biodata')
+                ->whereHas('wajibPajak', function ($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                });
+
+            return datatables()->of($query)
+                ->addIndexColumn()
+                ->make(true);
+        } 
+        else {
+            // Untuk role lain, kosongkan data (atau bisa pakai abort(403))
+            return datatables()->of([])->make(true);
+        }
     }
+
 }

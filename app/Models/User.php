@@ -50,4 +50,9 @@ class User extends Authenticatable
         return $this->hasOne(Biodata::class);
     }
 
+    public function pajaks()
+    {
+        return $this->hasOne(WajibPajak::class);
+    }
+
 }

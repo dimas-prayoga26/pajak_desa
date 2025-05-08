@@ -6,29 +6,20 @@
 
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
-@section('breadcumb')
-    <div class="page-header">
-        <h1 class="my-auto page-title">Detail Tagihan</h1>
-        <div>
-            <ol class="mb-0 breadcrumb">
-                <li class="breadcrumb-item">
-                    <a href="javascript:void(0)">Home</a>
-                </li>
-                <li class="breadcrumb-item active" aria-current="page">
-                    Detail Tagihan
-                </li>
-            </ol>
-        </div>
-    </div>
-@endsection
-
 @section('content')
 
     <section class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>Detail Tagihan</h1>
+                    @role('superAdmin')
+                        <h1 class="my-auto page-title">Detail Tagihan</h1>
+                    @else
+                        <h1 class="my-auto page-title">
+                            Detail Tagihan NOP: {{ Auth::user()->pajaks->nop ?? '-' }}
+                        </h1>
+                    @endrole
+
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -48,9 +39,11 @@
                         <div class="col-md-9 d-flex align-items-center gap-2">
                             <h3 class="card-title mb-0 mr-2">Data Detail Tagihan</h3>
                         </div>
+                        @role('superAdmin')
                         <div class="col-md-3 text-right">
                             <input type="text" id="searchNop" class="form-control form-control-sm" placeholder="Cari berdasarkan NOP">
                         </div>
+                        @endrole
 
                     </div>
                 </div>
@@ -59,11 +52,17 @@
                         <thead>
                             <tr>
                                 <th>No.</th>
-                                <th>nama</th>
+                                @role('superAdmin')
+                                    <th>nama</th>
+                                @endrole
                                 <th>tahun</th>
                                 <th>jumlah</th>
                                 <th>Status Bayar</th>
-                                <th>Aksi</th>
+                                @role('superAdmin')
+                                    <th>Aksi</th>
+                                @else
+                                    <th>Informasi</th>
+                                @endrole
                             </tr>
                         </thead>
                         <tbody>
@@ -128,87 +127,175 @@
         $('.select2').select2();
         var table;
 
+        let columns;
+        let columnDefs = [];
+
+        const userRole = @json(Auth::user()->getRoleNames()->first());
+
+        if (userRole === 'superAdmin') {
+            columns = [
+                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                { data: null },
+                { data: 'tahun' },
+                { data: 'jumlah' },
+                { data: 'status_bayar' },
+                { data: 'id' }
+            ];
+
+            columnDefs = [
+                {
+                    targets: 0,
+                    render: function (data, type, full, meta) {
+                        return meta.row + 1;
+                    }
+                },
+                {
+                    targets: 1,
+                    render: function (data, type, full, meta) {
+                        return full.wajib_pajak?.user?.biodata?.nama || '-';
+                    }
+                },
+                {
+                    targets: 3,
+                    render: function (data, type, full, meta) {
+                        let jumlah = parseFloat(data);
+                        if (!isNaN(jumlah)) {
+                            return new Intl.NumberFormat('id-ID', {
+                                style: 'currency',
+                                currency: 'IDR',
+                                minimumFractionDigits: 0
+                            }).format(jumlah);
+                        }
+                        return '-';
+                    }
+                },
+                {
+                    targets: 4,
+                    render: function (data, type, full, meta) {
+                        if (data === 'dibayar') {
+                            return '<span class="badge badge-success">Sudah Dibayar</span>';
+                        } else if (data === 'belum') {
+                            return '<span class="badge badge-warning">Belum Dibayar</span>';
+                        } else {
+                            return '<span class="badge badge-secondary">Tidak Diketahui</span>';
+                        }
+                    }
+                },
+                {
+                    targets: 5,
+                    render: function (data, type, full, meta) {
+                        return `
+                            <button type="button" class="btn btn-warning btn-sm" onclick="editData(${data})">
+                                <i class="fe fe-edit"></i> Edit
+                            </button>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="hapusData(${full.id})">
+                                <i class="fe fe-trash"></i> Hapus
+                            </button>
+                        `;
+                    }
+                }
+            ];
+        } else if (userRole === 'warga') {
+            columns = [
+                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                { data: 'tahun' },
+                { data: 'jumlah' },
+                { data: 'status_bayar' },
+                { data: 'id' }
+            ];
+
+            columnDefs = [
+                {
+                    targets: 0,
+                    render: function (data, type, full, meta) {
+                        return meta.row + 1;
+                    }
+                },
+                {
+                    targets: 2,
+                    render: function (data, type, full, meta) {
+                        let jumlah = parseFloat(data);
+                        if (!isNaN(jumlah)) {
+                            return new Intl.NumberFormat('id-ID', {
+                                style: 'currency',
+                                currency: 'IDR',
+                                minimumFractionDigits: 0
+                            }).format(jumlah);
+                        }
+                        return '-';
+                    }
+                },
+                {
+                    targets: 3,
+                    render: function (data, type, full, meta) {
+                        if (data === 'dibayar') {
+                            return '<span class="badge badge-success">Sudah Dibayar</span>';
+                        } else if (data === 'belum') {
+                            return '<span class="badge badge-warning">Belum Dibayar</span>';
+                        } else {
+                            return '<span class="badge badge-secondary">Tidak Diketahui</span>';
+                        }
+                    }
+                },
+                {
+                    targets: 4, // ganti sesuai posisi kolom aksi di tabelmu
+                    render: function (data, type, full, meta) {
+                        let tombol = '';
+
+                        switch (full.status_bayar) {
+                            case 'belum':
+                                tombol = `
+                                    <button type="button" class="btn btn-success btn-sm" onclick="bayarTagihan(${full.id})">
+                                        <i class="fe fe-dollar-sign"></i> Bayar
+                                    </button>
+                                `;
+                                break;
+
+                            case 'dibayar':
+                                tombol = `
+                                    <span class="badge badge-warning">Sedang direview oleh admin</span>
+                                `;
+                                break;
+
+                            case 'dikonfirmasi':
+                                tombol = `
+                                    <span class="badge badge-success">Pembayaran Dikonfirmasi Admin</span>
+                                `;
+                                break;
+
+                            default:
+                                tombol = `<span class="badge badge-secondary">Status Tidak Diketahui</span>`;
+                        }
+
+                        return tombol;
+                    }
+                }
+
+            ];
+        }
+
         $(document).ready(function () {
             table = $("#datatable").DataTable({
                 responsive: true,
                 processing: true,
                 serverSide: true,
                 autoWidth: false,
-                searching: false, // Disable search bawaan DataTables
+                searching: false,
                 ajax: {
                     url: "{{ route('detail-tagihan.datatable') }}",
                     data: function (d) {
-                        d.nop = $('#searchNop').val(); // Ambil nilai dari input manual
+                        d.nop = $('#searchNop').val();
                     }
                 },
-                columnDefs: [
-                    {
-                        targets: 0,
-                        render: function (data, type, full, meta) {
-                            return meta.row + 1;
-                        }
-                    },
-                    {
-                        targets: 1,
-                        render: function (data, type, full, meta) {
-                            return full.wajib_pajak?.user?.biodata?.nama || '-';
-                        }
-                    },
-                    {
-                        targets: 3,
-                        render: function (data, type, full, meta) {
-                            let jumlah = parseFloat(data);
-                            if (!isNaN(jumlah)) {
-                                return new Intl.NumberFormat('id-ID', {
-                                    style: 'currency',
-                                    currency: 'IDR',
-                                    minimumFractionDigits: 0
-                                }).format(jumlah);
-                            }
-                            return '-';
-                        }
-                    },
-                    {
-                        targets: 4,
-                        render: function (data, type, full, meta) {
-                            if (data === 'dibayar') {
-                                return '<span class="badge badge-success">Sudah Dibayar</span>';
-                            } else if (data === 'belum') {
-                                return '<span class="badge badge-warning">Belum Dibayar</span>';
-                            } else {
-                                return '<span class="badge badge-secondary">Tidak Diketahui</span>';
-                            }
-                        }
-                    },
-                    {
-                        targets: 5,
-                        render: function (data, type, full, meta) {
-                            return `
-                                <button type="button" class="btn btn-warning btn-sm" onclick="editData(${data})">
-                                    <i class="fe fe-edit"></i> Edit
-                                </button>
-                                <button type="button" class="btn btn-danger btn-sm" onclick="hapusData(${full.id})">
-                                    <i class="fe fe-trash"></i> Hapus
-                                </button>
-                            `;
-                        }
-                    }
-                ],
-                columns: [
-                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                    { data: null },
-                    { data: 'tahun' },
-                    { data: 'jumlah' },
-                    { data: 'status_bayar' },
-                    { data: 'id' }
-                ],
+                columnDefs: columnDefs,
+                
+                columns: columns,
                 language: {
                     searchPlaceholder: 'Cari NOP',
                     sSearch: ''
                 }
             });
 
-            // Reload datatable saat user mengetik NOP
             $('#searchNop').on('keyup', function () {
                 table.ajax.reload();
             });

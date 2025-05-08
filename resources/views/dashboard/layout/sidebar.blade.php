@@ -13,56 +13,65 @@
       <!-- Sidebar Menu -->
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-          
-          <!-- Dashboard -->
-          <li class="nav-item">
-            <a href="{{ route('dashboard') }}" 
-               class="nav-link {{ Request::is('super-admin/dashboard') ? 'active' : '' }}">
-              <i class="nav-icon fi fi-rr-dashboard"></i>
-              <p>Dashboard</p>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a href="{{ route('detail-pajak.index') }}" 
-               class="nav-link {{ Request::is('super-admin/detail-pajak') ? 'active' : '' }}">
-              <i class="nav-icon fi fi-tr-document-paid"></i>
-              <p>Data Pajak</p>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a href="{{ route('detail-tagihan.index') }}" 
-               class="nav-link {{ Request::is('super-admin/detail-tagihan') ? 'active' : '' }}">
+    
+            <!-- Dashboard -->
+            <li class="nav-item">
+                <a href="{{ route('dashboard') }}" 
+                   class="nav-link {{ Request::is('super-admin/dashboard') ? 'active' : '' }}">
+                    <i class="nav-icon fi fi-rr-dashboard"></i>
+                    <p>Dashboard</p>
+                </a>
+            </li>
+    
+            @role('superAdmin')
+            <!-- Data Pajak -->
+            <li class="nav-item">
+                <a href="{{ route('detail-pajak.index') }}" 
+                   class="nav-link {{ Request::is('super-admin/detail-pajak') ? 'active' : '' }}">
+                    <i class="nav-icon fi fi-tr-document-paid"></i>
+                    <p>Data Pajak</p>
+                </a>
+            </li>
+            @endrole
+    
+            
+            <!-- Data Tagihan (bisa untuk semua role) -->
+            <li class="nav-item">
+              <a href="{{ route('detail-tagihan.index') }}" 
+              class="nav-link {{ Request::is('super-admin/detail-tagihan') ? 'active' : '' }}">
               <i class="nav-icon fi fi-ts-to-do-alt"></i>
               <p>Data Tagihan</p>
             </a>
           </li>
 
+          @role('superAdmin')
+          <!-- Data User -->
           <li class="nav-item">
-            <a href="{{ route('user.index') }}" 
-               class="nav-link {{ Request::is('super-admin/user') ? 'active' : '' }}">
-              <i class="nav-icon fi fi-rr-users-alt"></i>
-              <p>Data user</p>
-            </a>
+              <a href="{{ route('user.index') }}" 
+                 class="nav-link {{ Request::is('super-admin/user') ? 'active' : '' }}">
+                  <i class="nav-icon fi fi-rr-users-alt"></i>
+                  <p>Data User</p>
+              </a>
           </li>
-      
-          <!-- Logout -->
-          <li class="nav-item">
-            <a href="{{ route('auth.logout') }}" 
-               class="nav-link {{ Request::is('auth.logout') ? 'active' : '' }}"
-               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-              <i class="nav-icon fi fi-rr-sign-out-alt"></i>
-              <p>Logout</p>
-            </a>
-      
-            <form id="logout-form" action="{{ route('auth.logout') }}" method="POST" class="d-none">
-              @csrf
-            </form>
-          </li>
-      
+          @endrole
+    
+            <!-- Logout -->
+            <li class="nav-item mt-auto">
+                <a href="{{ route('auth.logout') }}" 
+                   class="nav-link {{ Request::is('auth.logout') ? 'active' : '' }}"
+                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                    <i class="nav-icon fi fi-rr-sign-out-alt"></i>
+                    <p>Logout</p>
+                </a>
+    
+                <form id="logout-form" action="{{ route('auth.logout') }}" method="POST" class="d-none">
+                    @csrf
+                </form>
+            </li>
+    
         </ul>
-      </nav>
+    </nav>
+    
       
       <!-- /.sidebar-menu -->
     </div>

@@ -257,7 +257,10 @@
       
                 <div class="form-group">
                   <label for="edit_file">Foto Profile</label>
-                  <div class="input-group">
+                  <div id="edit_photo_preview">
+                        <img id="photo_preview" src="" alt="Current Photo" style="max-width: 150px; max-height: 150px;" />
+                  </div>
+                  <div class="input-group mt-2">
                     <div class="custom-file">
                       <input type="file" class="custom-file-input" id="edit_file" name="file_upload"  accept="image/*">
                       <label class="custom-file-label" for="edit_file">Pilih file</label>
@@ -381,136 +384,156 @@
         $("#no_hp").on('input', function() {
             var value = $(this).val();
             
-            // Allow only numbers
-            value = value.replace(/[^0-9]/g, ''); // Removes non-numeric characters
-            $(this).val(value);  // Update the field with the cleaned value
+            value = value.replace(/[^0-9]/g, '');
+            $(this).val(value);
 
-            // Limit the number of characters to 13
             if (value.length > 13) {
                 $(this).val(value.substring(0, 13));
             }
         });
 
+        
         function editData(id) {
-            console.log(id);
+            $.ajax({
+                url: "{{ url('super-admin/user') }}/" + id,
+                type: "GET",
+                success: function(response) {
+                    if (response.status === true) {
+                        const data = response.data;
+                        const user = data.user;
 
-                $.ajax({
-                    url: "{{ url('super-admin/detail-pajak') }}/" + id,
-                    type: "GET",
-                    success: function(response) {
-                        if (response.status === true) {
-                            const data = response.data;
-                            console.log(data);
-                            
-                            NameOptions(data.user_id);
-                            $('#edit_nop').val(data.nop);
-                            $('#edit_alamat').val(data.alamat);
-                            $('#edit_luas_bumi').val(data.luas_bumi);
-                            $('#edit_luas_bangunan').val(data.luas_bangunan);
-                            $('#editData').data('id', id);
-                            $('#modalEditData').modal('show');
-                        } else {
-                            toastr.warning('Data tidak ditemukan');
-                        }
-                    },
-                    error: function(xhr) {
-                        toastr.error('Terjadi kesalahan: ' + xhr.responseText);
-                    }
-                });
-            }
-
-            function hapusData(id) {
-                Swal.fire({
-                    title: 'Apakah Anda yakin?',
-                    text: "Data yang dihapus tidak dapat dikembalikan!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Ya, hapus!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: "{{ url('super-admin/user') }}/" + id,
-                            type: "DELETE",
-                            headers: {
-                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                            },
-                            success: function(response) {
-                                if (response.status === true) {
-                                    toastr.success(response.message, 'Berhasil');
-                                    table.ajax.reload();
-                                } else {
-                                    toastr.warning('Data tidak ditemukan.', 'Gagal');
-                                }
-                            },
-                            error: function(xhr) {
-                                let message = xhr.responseJSON?.message || xhr.responseText;
-                                toastr.error(message, 'Terjadi Kesalahan');
+                        let tglLahir = data.tanggal_lahir;
+                        let formattedTglLahir = '';
+                        if (tglLahir) {
+                            let parts = tglLahir.split('-');
+                            if (parts.length === 3) {
+                                formattedTglLahir = parts[2] + '/' + parts[1] + '/' + parts[0];
                             }
-                        });
+                        }
+
+                        $('#edit_nama').val(data.nama);
+                        $('#edit_username').val(user.username);
+                        $('#edit_email').val(user.email);
+                        $('#edit_password').val('');
+                        $('#edit_no_hp').val(data.no_hp);
+                        $('#edit_tanggal_lahir').val(formattedTglLahir);
+                        $('#edit_jenis_kelamin').val(data.jenis_kelamin);
+                        $('#edit_alamat').val(data.alamat);
+
+                        if (user.photo) {
+                            $('#photo_preview').attr('src', "{{ asset('') }}" + user.photo);
+                            $('#edit_photo_preview').show();
+                        } else {
+                            $('#edit_photo_preview').hide();
+                        }
+
+                        $('#editData').data('id', id);
+                        $('#modalEditData').modal('show');
+                    } else {
+                        toastr.warning('Data tidak ditemukan');
                     }
-                });
+                },
+                error: function(xhr) {
+                    toastr.error('Terjadi kesalahan: ' + xhr.responseText);
+                }
+            });
+        }
+
+
+        $('#edit_file').on('change', function() {
+            const fileName = $(this).val().split('\\').pop();
+            $(this).next('.custom-file-label').html(fileName);
+        });
+
+
+
+        function hapusData(id) {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data yang dihapus tidak dapat dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ url('super-admin/user') }}/" + id,
+                        type: "DELETE",
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            if (response.status === true) {
+                                toastr.success(response.message, 'Berhasil');
+                                table.ajax.reload();
+                            } else {
+                                toastr.warning('Data tidak ditemukan.', 'Gagal');
+                            }
+                        },
+                        error: function(xhr) {
+                            let message = xhr.responseJSON?.message || xhr.responseText;
+                            toastr.error(message, 'Terjadi Kesalahan');
+                        }
+                    });
+                }
+            });
+        }
+
+        $("#simpanData").on("click", function (e) {
+            e.preventDefault();
+
+            var nomorHp = $("#no_hp").val();
+            var phoneRegex = /^[0-9]{10,13}$/; 
+            if (!phoneRegex.test(nomorHp)) {
+                toastr.warning('Nomor HP harus berupa angka dengan panjang 10 hingga 13 digit.', 'Peringatan');
+                $('#no_hp').focus();
+                return; 
             }
 
-            $("#simpanData").on("click", function (e) {
-                e.preventDefault();
+            let formData = new FormData();
 
-                // Validate Nomor HP (10 - 13 digits, numbers only)
-                var nomorHp = $("#no_hp").val();
-                var phoneRegex = /^[0-9]{10,13}$/;  // Only numbers, 10 to 13 digits
+            formData.append("nama", $("#nama").val());
+            formData.append("email", $("#email").val());
+            formData.append("username", $("#username").val());
+            formData.append("password", $("#password").val());
+            formData.append("no_hp", nomorHp);
+            formData.append("tanggal_lahir", $("#tanggal_lahir").val());
+            formData.append("jenis_kelamin", $("#jenis_kelamin").val());
+            formData.append("alamat", $("#alamat").val());
 
-                if (!phoneRegex.test(nomorHp)) {
-                    toastr.warning('Nomor HP harus berupa angka dengan panjang 10 hingga 13 digit.', 'Peringatan');
-                    $('#no_hp').focus();
-                    return;  // Stop the function if validation fails
-                }
+            let fileUpload = $("#file_upload")[0].files[0];
+            if (fileUpload) {
+                formData.append("file_upload", fileUpload);
+            }
 
-                // Create FormData object
-                let formData = new FormData();
-
-                formData.append("nama", $("#nama").val());
-                formData.append("email", $("#email").val());
-                formData.append("username", $("#username").val());
-                formData.append("password", $("#password").val());
-                formData.append("no_hp", nomorHp);  // Use validated Nomor HP
-                formData.append("tanggal_lahir", $("#tanggal_lahir").val());
-                formData.append("jenis_kelamin", $("#jenis_kelamin").val());
-                formData.append("alamat", $("#alamat").val());
-
-                // If a file is selected, append it to the form data
-                let fileUpload = $("#file_upload")[0].files[0];
-                if (fileUpload) {
-                    formData.append("file_upload", fileUpload);
-                }
-
-                // Send the data via AJAX
-                $.ajax({
-                    url: "{{ url('super-admin/user') }}", // Sesuaikan dengan URL endpoint Anda
-                    type: "POST",
-                    data: formData,
-                    processData: false,  // Don't process data
-                    contentType: false,  // Don't set content type
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function (response) {
-                        if (response.status === true) {
-                            toastr.success(response.message, 'Berhasil');
-                            $("#tambahData")[0].reset();
-                            $('#modalTambahData').modal('hide');
-                            table.ajax.reload();
-                        } else {
-                            toastr.warning(response.message || 'Data tidak berhasil diproses.', 'Peringatan');
-                        }
-                    },
-                    error: function (xhr) {
-                        const message = xhr.responseJSON?.message || 'Terjadi kesalahan saat menyimpan data.';
-                        toastr.error(message, 'Gagal');
+            $.ajax({
+                url: "{{ url('super-admin/user') }}", 
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false, 
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function (response) {
+                    if (response.status === true) {
+                        toastr.success(response.message, 'Berhasil');
+                        $("#tambahData")[0].reset();
+                        $('#modalTambahData').modal('hide');
+                        table.ajax.reload();
+                    } else {
+                        toastr.warning(response.message || 'Data tidak berhasil diproses.', 'Peringatan');
                     }
-                });
+                },
+                error: function (xhr) {
+                    const message = xhr.responseJSON?.message || 'Terjadi kesalahan saat menyimpan data.';
+                    toastr.error(message, 'Gagal');
+                }
             });
+        });
 
 
 
@@ -518,27 +541,43 @@
             e.preventDefault();
 
             let id = $("#editData").data('id');
+            let formData = new FormData();
 
-            let formData = {
-                user_id: $("#edit_user_id").val(),
-                nop: $("#edit_nop").val(),
-                alamat: $("#edit_alamat").val(),
-                luas_bumi: $("#edit_luas_bumi").val(),
-                luas_bangunan: $("#edit_luas_bangunan").val(),
-            };
+            formData.append('_method', 'PUT');
+            formData.append('nama', $("#edit_nama").val());
+            formData.append('username', $("#edit_username").val());
+            formData.append('email', $("#edit_email").val());
+            formData.append('password', $("#edit_password").val());
+            formData.append('no_hp', $("#edit_no_hp").val());
+            formData.append('tanggal_lahir', $("#edit_tanggal_lahir").val());
+            formData.append('jenis_kelamin', $("#edit_jenis_kelamin").val());
+            formData.append('alamat', $("#edit_alamat").val());
+
+            let photo = $('#edit_file')[0].files[0];
+            if (photo) {
+                formData.append('photo', photo);
+            }
 
             $.ajax({
-                url: "{{ url('super-admin/detail-pajak') }}/" + id,
-                type: "PUT",
+                url: "{{ url('super-admin/user') }}/" + id,
+                type: "POST",
                 data: formData,
+                contentType: false,
+                processData: false,
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 success: function(response) {
                     if (response.status === true) {
                         toastr.success(response.message, 'Berhasil');
+
                         $("#editData")[0].reset();
+
+                        $('#edit_file').val(null);
+                        $('.custom-file-label[for="edit_file"]').text('Pilih Foto');
+
                         $('#modalEditData').modal('hide');
+
                         table.ajax.reload();
                     } else {
                         toastr.warning(response.message || 'Update gagal.', 'Peringatan');
@@ -550,6 +589,8 @@
                 }
             });
         });
+
+
 
 
 
