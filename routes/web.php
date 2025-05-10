@@ -7,6 +7,8 @@ use App\Http\Controllers\TagihanController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WajibPajakController;
 
+Route::redirect('/', '/auth/login');
+
 Route::group(["middleware" => ["guest"]], function() {
     Route::prefix("auth")->group(function() {
         Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
