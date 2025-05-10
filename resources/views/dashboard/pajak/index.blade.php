@@ -111,11 +111,16 @@
             <form id="tambahData">
               <div class="modal-body">
       
-                <div class="form-group">
+                {{-- <div class="form-group">
                     <label for="name" class="form-label">Nama</label>
                     <select class="form-control" name="name" id="name">
                         <option value="">Pilih salah satu</option>
                     </select>                    
+                </div> --}}
+
+                <div class="form-group">
+                  <label for="name">Nama</label>
+                  <input type="text" class="form-control" id="name" name="name" placeholder="Nama">
                 </div>
       
                 <div class="form-group">
@@ -170,11 +175,16 @@
             <form id="editData">
               <div class="modal-body">
       
-                <div class="form-group">
+                {{-- <div class="form-group">
                   <label for="edit_user_id" class="form-label">Nama</label>
                   <select class="form-control" name="user_id" id="edit_user_id">
                     <option value="">Pilih salah satu</option>
                   </select>    
+                </div> --}}
+
+                <div class="form-group">
+                  <label for="edit_name" class="form-label">Nama</label>
+                  <input type="text" class="form-control" id="edit_name" name="name" placeholder="Nama">
                 </div>
       
                 <div class="form-group">
@@ -262,8 +272,10 @@
                   <!-- Data akan diisi via JavaScript -->
                 </tbody>
               </table>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="confirmation">Konfirmasi</button>
             </div>
-      
+            </div>
           </div>
         </div>
       </div>
@@ -297,35 +309,35 @@
         $('.select2').select2();
         var table;
 
-        $('#modalTambahData').on('shown.bs.modal', function () {
-            $('#name').select2({
-                placeholder: 'Cari nama wajib pajak...',
-                allowClear: true,
-                width: '100%',
-                dropdownParent: $('#modalTambahData'),
-                ajax: {
-                    url: "{{ route('detail-pajak.user-options') }}",
-                    dataType: 'json',
-                    delay: 250,
-                    data: function (params) {
-                        return {
-                            q: params.term
-                        };
-                    },
-                    processResults: function (data) {
-                        return {
-                            results: data.map(function (item) {
-                                return {
-                                    id: item.id,
-                                    text: `${item.nama}`
-                                };
-                            })
-                        };
-                    },
-                    cache: true
-                }
-            });
-        });
+        // $('#modalTambahData').on('shown.bs.modal', function () {
+        //     $('#name').select2({
+        //         placeholder: 'Cari nama wajib pajak...',
+        //         allowClear: true,
+        //         width: '100%',
+        //         dropdownParent: $('#modalTambahData'),
+        //         ajax: {
+        //             url: "{{ route('detail-pajak.user-options') }}",
+        //             dataType: 'json',
+        //             delay: 250,
+        //             data: function (params) {
+        //                 return {
+        //                     q: params.term
+        //                 };
+        //             },
+        //             processResults: function (data) {
+        //                 return {
+        //                     results: data.map(function (item) {
+        //                         return {
+        //                             id: item.id,
+        //                             text: `${item.nama}`
+        //                         };
+        //                     })
+        //                 };
+        //             },
+        //             cache: true
+        //         }
+        //     });
+        // });
 
         $(document).ready(function () {
             table = $("#datatable").DataTable({
@@ -348,14 +360,6 @@
                         }
                     },
                     {
-                        targets: 1,
-                        render: function (data, type, full, meta) {
-                            return full.user && full.user.biodata && full.user.biodata.nama
-                                ? full.user.biodata.nama
-                                : '-';
-                        }
-                    },
-                    {
                         targets: 4,
                         render: function (data) {
                             return `${parseFloat(data).toFixed(2)} m²`;
@@ -374,8 +378,10 @@
                                 return `<span class="badge badge-danger">Belum Dibayar</span>`;
                             } else if (data === 'dibayar') {
                                 return `<span class="badge badge-success">Sudah Dibayarkan</span>`;
+                            } else if (data === null){
+                                return `<span class="badge badge-secondary">Pajak Belum Di Tetapkan</span>`;
                             } else {
-                                return `<span class="badge badge-secondary">Status Tidak Diketahui</span>`;
+                                return `<span class="badge badge-primary">Tidak Di Ketahui</span>`;
                             }
                         }
                     },
@@ -384,18 +390,20 @@
                         orderable: false,
                         searchable: false,
                         render: function (data, type, full, meta) {
+                            const isDisabled = full.user_id === null;
                             return `
-                                <button type="button" class="btn btn-success btn-sm" onclick="kirimTagihan(${full.id})">
+                                <div class="btn btn-success btn-sm ${isDisabled ? 'disabled' : ''}" onclick="handleKirimTagihan(${full.id}, ${isDisabled})">
                                     Kirim Pemberitahuan
-                                </button>
+                                </div>
                             `;
                         }
                     },
                     {
                         targets: 8,
                         render: function (data, type, full, meta) {
+                            const isDisabled = full.user_id === null;
                             return `
-                                <button type="button" class="btn btn-info btn-sm" onclick="lihatDetail(${full.id})">
+                                <button type="button" class="btn btn-info btn-sm ${isDisabled ? 'disabled' : ''}" onclick="handleDetail(${full.id}, ${isDisabled})">
                                     <i class="fe fe-eye"></i> Detail
                                 </button>
                                 <button type="button" class="btn btn-warning btn-sm" onclick="editData(${data})">
@@ -408,10 +416,11 @@
                         }
                     }
 
+
                 ],
                 columns: [
                     { data: null },
-                    { data: 'user_id' },
+                    { data: 'name' },
                     { data: 'nop' },
                     { data: 'alamat' },
                     { data: 'luas_bumi' },
@@ -422,52 +431,120 @@
                 ],
                 language: {
                     searchPlaceholder: 'Search...',
-                    sSearch: ''
+                    sSearch: '',
                 }
             });
-
-            // $('#filterTahun').on('change', function () {
-            //     table.ajax.reload();
-            // });
         });
+
+        function handleDetail(id, isDisabled) {
+            if (isDisabled) {
+                toastr.warning("Pajak ini belum terealisasi");
+            } else {
+                lihatDetail(id);
+            }
+        }
+
+
+        function handleKirimTagihan(id, isDisabled) {
+            if (isDisabled) {
+                toastr.warning("Pajak ini belum terealisasi");
+            } else {
+                kirimTagihan(id);
+            }
+        }
+
 
         function lihatDetail(id) {
-        $.ajax({        
-            url: `/super-admin/detail-pajak/tagihan/${id}`,
-            type: 'GET',
-            success: function (response) {
-                if (response.status) {
-                    $('#modalNamaUser').text(response.nama); // update judul modal
+            $.ajax({
+                url: `/super-admin/detail-pajak/tagihan/${id}`,
+                type: 'GET',
+                success: function (response) {
+                    console.log(response.data[0].id); // cek id pertama
 
-                    let rows = '';
-                    response.data.forEach((tagihan, index) => {
-                        rows += `
-                            <tr>
-                                <td>${index + 1}</td>
-                                <td>${tagihan.tahun}</td>
-                                <td>Rp ${parseInt(tagihan.jumlah).toLocaleString('id-ID')}</td>
-                                <td>
-                                    ${tagihan.status_bayar === 'dibayar'
-                                        ? '<span class="badge badge-success">Sudah Dibayar</span>'
-                                        : '<span class="badge badge-warning">Belum Dibayar</span>'}
-                                </td>
-                                <td>
-                                    <button class="btn btn-sm btn-info" onclick="lihatDetailTagihan(${tagihan.id})">
-                                        <i class="fa fa-eye"></i> Lihat Detail
-                                    </button>
-                                </td>
-                            </tr>`;
-                    });
+                    if (response.data.length > 0) {
+                        $('#confirmation').attr('data-id', response.data[0].id);
+                    }
 
-                    $('#detailTagihanBody').html(rows);
-                    $('#modalDetail').modal('show');
+                    if (response.status) {
+                        $('#modalNamaUser').text(response.nama);
+
+                        let rows = '';
+                        response.data.forEach((tagihan, index) => {
+                            rows += `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>${tagihan.tahun}</td>
+                                    <td>Rp ${parseInt(tagihan.jumlah).toLocaleString('id-ID')}</td>
+                                    <td>
+                                        ${tagihan.status_bayar === 'dibayar'
+                                            ? '<span class="badge badge-success">Sudah Dibayar</span>'
+                                            : '<span class="badge badge-warning">Belum Dibayar</span>'}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info" onclick="lihatDetailTagihan(${tagihan.id})">
+                                            <i class="fa fa-eye"></i> Lihat Detail
+                                        </button>
+                                    </td>
+                                </tr>`;
+                        });
+
+                        $('#detailTagihanBody').html(rows);
+                        $('#modalDetail').modal('show');
+                    }
+                },
+                error: function () {
+                    toastr.error("Gagal mengambil data tagihan");
                 }
-            },
-            error: function () {
-                toastr.error("Gagal mengambil data tagihan");
-            }
+            });
+        }
+
+
+        $('#confirmation').click(function () {
+            let id = $(this).attr('data-id');
+
+            Swal.fire({
+                title: 'Konfirmasi Pembayaran',
+                text: "Yakin ingin mengkonfirmasi status pembayaran ini?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Konfirmasi',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('detail-pajak.update-status') }}",
+                        type: "POST",
+                        data: {
+                            id: id,
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function (response) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: response.message,
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                            $('#modalDetail').modal('hide');
+                        },
+                        error: function (xhr) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal!',
+                                text: xhr.status === 404
+                                    ? 'Data tidak ditemukan.'
+                                    : 'Gagal memperbarui data.'
+                            });
+                        }
+                    });
+                }
+            });
         });
-    }
+
+
 
 
         function formatRupiah(angka, prefix) {
@@ -535,7 +612,8 @@
                             const data = response.data;
                             console.log(data);
                             
-                            NameOptions(data.user_id);
+                            // NameOptions(data.user_id);
+                            $('#edit_name').val(data.name);
                             $('#edit_nop').val(data.nop);
                             $('#edit_alamat').val(data.alamat);
                             $('#edit_luas_bumi').val(data.luas_bumi);
@@ -552,30 +630,30 @@
                 });
             }
 
-            function NameOptions(selectedId = null) {
-                $.ajax({
-                    url: "{{ route('detail-pajak.user-options') }}",
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function (response) {
-                        const $select = $('#edit_user_id');
-                        $select.empty().append('<option value="">Pilih nama wajib pajak</option>');
+            // function NameOptions(selectedId = null) {
+            //     $.ajax({
+            //         url: "{{ route('detail-pajak.user-options') }}",
+            //         type: 'GET',
+            //         dataType: 'json',
+            //         success: function (response) {
+            //             const $select = $('#edit_user_id');
+            //             $select.empty().append('<option value="">Pilih nama wajib pajak</option>');
 
-                        $.each(response, function (i, item) {
-                            console.log(item);
+            //             $.each(response, function (i, item) {
+            //                 console.log(item);
                             
-                            $select.append(`<option value="${item.id}">${item.nama}</option>`);
-                        });
+            //                 $select.append(`<option value="${item.id}">${item.nama}</option>`);
+            //             });
 
-                        if (selectedId) {
-                            $select.val(selectedId).trigger('change');
-                        }
-                    },
-                    error: function () {
-                        toastr.error('Tidak dapat mengambil data user dari server.', 'Gagal');
-                    }
-                });
-            }
+            //             if (selectedId) {
+            //                 $select.val(selectedId).trigger('change');
+            //             }
+            //         },
+            //         error: function () {
+            //             toastr.error('Tidak dapat mengambil data user dari server.', 'Gagal');
+            //         }
+            //     });
+            // }
 
             function hapusData(id) {
                 Swal.fire({
@@ -656,7 +734,7 @@
             let id = $("#editData").data('id');
 
             let formData = {
-                user_id: $("#edit_user_id").val(),
+                name: $("#edit_name").val(),
                 nop: $("#edit_nop").val(),
                 alamat: $("#edit_alamat").val(),
                 luas_bumi: $("#edit_luas_bumi").val(),

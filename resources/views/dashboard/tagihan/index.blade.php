@@ -127,6 +127,7 @@
         $('.select2').select2();
         var table;
 
+        let debounceTimer;
         let columns;
         let columnDefs = [];
 
@@ -285,19 +286,33 @@
                     url: "{{ route('detail-tagihan.datatable') }}",
                     data: function (d) {
                         d.nop = $('#searchNop').val();
-                    }
+                    },
+                    dataSrc: function (json) {
+                        const validTypes = ['success', 'error', 'warning', 'info'];
+                        const type = validTypes.includes(json.type) ? json.type : 'info';
+
+                        if (json.status === false && json.message) {
+                            toastr[type](json.message);
+                        }
+
+                        return json.data;
+                    },
                 },
                 columnDefs: columnDefs,
                 
                 columns: columns,
                 language: {
                     searchPlaceholder: 'Cari NOP',
-                    sSearch: ''
+                    sSearch: '',
+                    zeroRecords: "Tidak ditemukan hasil",
                 }
             });
 
             $('#searchNop').on('keyup', function () {
-                table.ajax.reload();
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(function () {
+                    table.ajax.reload();
+                }, 500); // hanya reload 500ms setelah user berhenti mengetik
             });
         });
 

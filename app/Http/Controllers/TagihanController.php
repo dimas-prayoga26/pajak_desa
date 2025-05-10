@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tagihan;
+use App\Models\WajibPajak;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -192,23 +193,51 @@ class TagihanController extends Controller
     {
         $user = auth()->user();
 
+        // SUPER ADMIN
         if ($user->hasRole('superAdmin')) {
-            // Superadmin harus input NOP untuk pencarian
-            if (!$request->filled('nop')) {
+            $nop = $request->nop;
+
+            if (strlen($nop) !== 18) {
                 return datatables()->of([])->make(true);
             }
 
+            $exists = WajibPajak::where('nop', 'like', '%' . $nop . '%')->exists();
+
+            if (!$exists) {
+                $data = datatables()->of([])->make(true)->getData(true);
+                return response()->json(array_merge($data, [
+                    'status' => false,
+                    'type' => 'error',
+                    'message' => 'NOP tidak ditemukan.'
+                ]));
+            }
+
+            $wajibPajak = WajibPajak::where('nop', 'like', '%' . $nop . '%')
+                ->whereNull('user_id')
+                ->first();
+
+            if ($wajibPajak) {
+                $data = datatables()->of([])->make(true)->getData(true);
+                return response()->json(array_merge($data, [
+                    'status' => false,
+                    'type' => 'info',
+                    'message' => 'NOP ditemukan, tapi belum direalisasikan (user belum terhubung).'
+                ]));
+            }
+
             $query = Tagihan::with('wajibPajak.user.biodata')
-                ->whereHas('wajibPajak', function ($q) use ($request) {
-                    $q->where('nop', 'like', '%' . $request->nop . '%');
+                ->whereHas('wajibPajak', function ($q) use ($nop) {
+                    $q->where('nop', 'like', '%' . $nop . '%');
                 });
 
             return datatables()->of($query)
                 ->addIndexColumn()
                 ->make(true);
-        } 
+        }
+
+
+        // WARGA
         elseif ($user->hasRole('warga')) {
-            // Warga langsung ambil data berdasarkan user yang login
             $query = Tagihan::with('wajibPajak.user.biodata')
                 ->whereHas('wajibPajak', function ($q) use ($user) {
                     $q->where('user_id', $user->id);
@@ -217,11 +246,11 @@ class TagihanController extends Controller
             return datatables()->of($query)
                 ->addIndexColumn()
                 ->make(true);
-        } 
-        else {
-            // Untuk role lain, kosongkan data (atau bisa pakai abort(403))
-            return datatables()->of([])->make(true);
         }
+
+        return datatables()->of([])->make(true);
     }
+
+
 
 }

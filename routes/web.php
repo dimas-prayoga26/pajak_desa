@@ -23,10 +23,15 @@ Route::middleware(['web', 'auth'])->group(function () {
 
     Route::prefix("super-admin")->group(function() {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/search-nop', [DashboardController::class, 'searchNop'])->name('dashboard.search.nop');
+        Route::post('dashboard/update-user-nop', [DashboardController::class, 'updateUser'])->middleware('auth')->name('dashboard.update-user');
+
+
 
         Route::get("/detail-pajak/datatable", [WajibPajakController::class, "datatable"])->name("detail-pajak.datatable");
         Route::get('/detail-pajak/tagihan/{id}', [WajibPajakController::class, 'getByWajibPajak'])->name("detail-pajak.getByWajibPajak");
         Route::post("/detail-pajak/{id}/kirim", [WajibPajakController::class, "sendNotification"])->name("detail-pajak.notification");
+        Route::post('detail-pajak/update-status', [WajibPajakController::class, 'updatePaymentStatus'])->name('detail-pajak.update-status');
         Route::get('/detail-pajak/user-options', [WajibPajakController::class, 'getUserOptions'])->name('detail-pajak.user-options');
         Route::resource("detail-pajak", WajibPajakController::class);
 

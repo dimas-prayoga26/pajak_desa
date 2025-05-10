@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use App\Models\WajibPajak;
 use Illuminate\Database\Seeder;
+use Faker\Factory as Faker;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class WajibPajakSeeder extends Seeder
@@ -14,18 +15,20 @@ class WajibPajakSeeder extends Seeder
      */
     public function run(): void
     {
-        $users = User::role('warga')->get();
+        $faker = Faker::create('id_ID');
 
-        foreach ($users as $user) {
+        for ($i = 0; $i < 50; $i++) {
             WajibPajak::create([
-                'user_id' => $user->id,
-                'nop' => 'NOP-' . rand(100000, 999999),
-                'alamat' => 'Jl. Citra Nomor ' . rand(1, 100),
-                'luas_bumi' => rand(50, 150),
-                'luas_bangunan' => rand(30, 120),
-                // 'tahun' => rand(2021, 2025), // tahun acak
+                'user_id' => null,
+                'name' => $faker->name,
+                'nop' => $faker->unique()->regexify('[0-9]{18}'),
+                'alamat' => $faker->address,
+                'luas_bumi' => $faker->numberBetween(50, 150),
+                'luas_bangunan' => $faker->numberBetween(30, 120),
+                'status_bayar' => null,
             ]);
         }
+
 
     }
 }

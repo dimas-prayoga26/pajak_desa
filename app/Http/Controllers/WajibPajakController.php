@@ -55,7 +55,7 @@ class WajibPajakController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|exists:users,id',
+            'name' => 'required|string|max:30',
             'nop' => 'required|string|max:100',
             'alamat' => 'required|string',
             'luas_bumi' => 'required|numeric',
@@ -66,12 +66,13 @@ class WajibPajakController extends Controller
             DB::beginTransaction();
 
             $this->detailPajak->create([
-                "user_id" => $request->name,
+                "name" => $request->name,
                 "nop" => $request->nop,
                 "alamat" => $request->alamat,
                 "luas_bumi" => $request->luas_bumi,
                 "luas_bangunan" => $request->luas_bangunan,
-                "tahun" => now()->year, // ⬅️ Tambahkan tahun sekarang
+                "status_bayar" => null
+                // "tahun" => now()->year,
             ]);
 
             DB::commit();
@@ -138,7 +139,7 @@ class WajibPajakController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'name' => 'required|string|max:30',
             'nop' => 'required|string|max:100',
             'alamat' => 'required|string',
             'luas_bumi' => 'required|numeric',
@@ -149,7 +150,7 @@ class WajibPajakController extends Controller
             DB::beginTransaction();
 
             $this->detailPajak->where("id", $id)->update([
-                "user_id" => $request->user_id,
+                "name" => $request->name,
                 "nop" => $request->nop,
                 "alamat" => $request->alamat,
                 "luas_bumi" => $request->luas_bumi,
@@ -219,27 +220,27 @@ class WajibPajakController extends Controller
 
 
 
-    public function getUserOptions(Request $request)
-    {
-        $search = $request->input('q');
+    // public function getUserOptions(Request $request)
+    // {
+    //     $search = $request->input('q');
 
-        $users = User::role('warga')
-            ->with('biodata')
-            ->whereHas('biodata', function ($query) use ($search) {
-                $query->where('nama', 'like', "%{$search}%");
-            })
-            ->get();
+    //     $users = User::role('warga')
+    //         ->with('biodata')
+    //         ->whereHas('biodata', function ($query) use ($search) {
+    //             $query->where('nama', 'like', "%{$search}%");
+    //         })
+    //         ->get();
 
-        // dd($users)
-        $formatted = $users->map(function ($user) {
-            return [
-                'id' => $user->id,
-                'nama' => optional($user->biodata)->nama ?? $user->email,
-            ];
-        });
+    //     // dd($users)
+    //     $formatted = $users->map(function ($user) {
+    //         return [
+    //             'id' => $user->id,
+    //             'nama' => optional($user->biodata)->nama ?? $user->email,
+    //         ];
+    //     });
 
-        return response()->json($formatted);
-    }
+    //     return response()->json($formatted);
+    // }
 
     public function sendNotification(Request $request)
     {
@@ -251,8 +252,12 @@ class WajibPajakController extends Controller
         try {
             DB::beginTransaction();
 
+            $wajibPajak = WajibPajak::findOrFail($request->id);
+            $wajibPajak->status_bayar = 'belum';
+            $wajibPajak->save();
+
             Tagihan::create([
-                'wajib_pajak_id' => $request->id,
+                'wajib_pajak_id' => $wajibPajak->id,
                 'tahun' => date('Y'),
                 'jumlah' => $request->jumlah_tagihan,
                 'status_bayar' => 'belum',
@@ -269,10 +274,11 @@ class WajibPajakController extends Controller
 
             return response()->json([
                 'status' => false,
-                'message' => $e->getMessage()
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
             ], 500);
         }
     }
+
 
     public function getByWajibPajak($id)
     {
@@ -280,13 +286,43 @@ class WajibPajakController extends Controller
 
         $tagihans = $wajib->tagihans()
             ->orderBy('tahun', 'desc')
-            ->get(['tahun', 'jumlah', 'status_bayar']);
+            ->get();
 
         return response()->json([
             'status' => true,
             'nama' => optional($wajib->user->biodata)->nama ?? $wajib->user->email,
             'data' => $tagihans
         ]);
+    }
+
+    public function updatePaymentStatus($id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $tagihan = Tagihan::findOrFail($id);
+
+            $tagihan->status_bayar = 'dikonfirmasi';
+            $tagihan->save();
+
+            $wajibPajak = WajibPajak::findOrFail($tagihan->wajib_pajak_id);
+            $wajibPajak->status_bayar = 'dibayar';
+            $wajibPajak->save();
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Status pembayaran berhasil dikonfirmasi.'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal mengupdate status: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     
