@@ -212,19 +212,6 @@ class TagihanController extends Controller
                 ]));
             }
 
-            $wajibPajak = WajibPajak::where('nop', 'like', '%' . $nop . '%')
-                ->whereNull('user_id')
-                ->first();
-
-            if ($wajibPajak) {
-                $data = datatables()->of([])->make(true)->getData(true);
-                return response()->json(array_merge($data, [
-                    'status' => false,
-                    'type' => 'info',
-                    'message' => 'NOP ditemukan, tapi belum direalisasikan (user belum terhubung).'
-                ]));
-            }
-
             $query = Tagihan::with('wajibPajak.user.biodata')
                 ->whereHas('wajibPajak', function ($q) use ($nop) {
                     $q->where('nop', 'like', '%' . $nop . '%');

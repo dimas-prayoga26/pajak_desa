@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
-            WajibPajakSeeder::class,
+            // WajibPajakSeeder::class,
             // TagihanSeeder::class,
             // PembayaranSeeder::class,
             BiodataSeeder::class,

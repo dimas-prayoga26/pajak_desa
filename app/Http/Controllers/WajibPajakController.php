@@ -54,25 +54,47 @@ class WajibPajakController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request);
         $request->validate([
             'name' => 'required|string|max:30',
-            'nop' => 'required|string|max:100',
+            'nop' => 'required|string|size:18',
             'alamat' => 'required|string',
-            'luas_bumi' => 'required|numeric',
-            'luas_bangunan' => 'required|numeric',
+            'luas_bumi' => 'required|numeric|min:0',
+            'luas_bangunan' => 'required|numeric|min:0',
+            'jumlah_tagihan' => 'required|string',
+        ], [
+            'name.required' => 'Nama wajib diisi.',
+            'nop.required' => 'NOP wajib diisi.',
+            'nop.size' => 'NOP harus tepat 18 digit.',
+            'alamat.required' => 'Alamat wajib diisi.',
+            'luas_bumi.required' => 'Luas bumi wajib diisi.',
+            'luas_bumi.numeric' => 'Luas bumi harus berupa angka.',
+            'luas_bangunan.required' => 'Luas bangunan wajib diisi.',
+            'luas_bangunan.numeric' => 'Luas bangunan harus berupa angka.',
+            'jumlah_tagihan.required' => 'Jumlah tagihan wajib diisi.',
         ]);
 
+
+
         try {
+
             DB::beginTransaction();
 
-            $this->detailPajak->create([
+            $wajibPajak = $this->detailPajak->create([
                 "name" => $request->name,
                 "nop" => $request->nop,
                 "alamat" => $request->alamat,
                 "luas_bumi" => $request->luas_bumi,
                 "luas_bangunan" => $request->luas_bangunan,
-                "status_bayar" => null
-                // "tahun" => now()->year,
+                "status_bayar" => 'belum'
+            ]);
+
+            $jumlah = str_replace(['Rp', '.', ' '], '', $request->jumlah_tagihan);
+
+            $wajibPajak->tagihans()->create([
+                'jumlah' => $jumlah,
+                'tahun' => now()->year,
+                'status_bayar' => 'belum'
             ]);
 
             DB::commit();
@@ -81,7 +103,6 @@ class WajibPajakController extends Controller
                 "status" => true,
                 "message" => "Data berhasil ditambahkan"
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -90,6 +111,7 @@ class WajibPajakController extends Controller
                 "message" => $e->getMessage()
             ], 500);
         }
+
     }
 
 
@@ -104,7 +126,7 @@ class WajibPajakController extends Controller
 
             DB::beginTransaction();
 
-            $data = $this->detailPajak->with('user.biodata')->find($id);
+            $data = $this->detailPajak->with('tagihans', 'user.biodata')->find($id);
 
             DB::commit();
 

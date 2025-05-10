@@ -153,7 +153,11 @@
                 {
                     targets: 1,
                     render: function (data, type, full, meta) {
-                        return full.wajib_pajak?.user?.biodata?.nama || '-';
+                        if (!full.wajib_pajak?.user_id || !full.wajib_pajak?.user) {
+                            return '<span class="text-danger">Belum terhubung dengan pengguna</span>';
+                        }
+
+                        return full.wajib_pajak.user.biodata?.nama || '-';
                     }
                 },
                 {
