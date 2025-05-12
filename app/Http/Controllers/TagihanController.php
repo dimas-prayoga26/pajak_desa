@@ -6,6 +6,7 @@ use App\Models\Tagihan;
 use App\Models\WajibPajak;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class TagihanController extends Controller
 {
@@ -41,44 +42,60 @@ class TagihanController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|exists:users,id',
-            'nop' => 'required|string|max:100',
-            'alamat' => 'required|string',
-            'luas_bumi' => 'required|numeric',
-            'luas_bangunan' => 'required|numeric',
+        $request->merge([
+            'jumlah' => (int) str_replace(['Rp', '.', ',', ' '], '', $request->jumlah)
         ]);
+
+        $validator = Validator::make($request->all(), [
+            'wajib_pajak_id' => 'required|exists:wajib_pajaks,id',
+            'tahun' => 'required|digits:4|integer',
+            'jumlah' => 'required|numeric|min:1',
+            'jatuh_tempo' => 'required|date|after_or_equal:today',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
 
         try {
             DB::beginTransaction();
 
-            $this->detailTagihan->create([
-                "user_id" => $request->name,
-                "nop" => $request->nop,
-                "alamat" => $request->alamat,
-                "luas_bumi" => $request->luas_bumi,
-                "luas_bangunan" => $request->luas_bangunan,
-                "tahun" => now()->year, // ⬅️ Tambahkan tahun sekarang
+            $existingTagihan = WajibPajak::where('id', $request->wajib_pajak_id)
+                ->where('status_bayar', 'dibayar')
+                ->first();
+
+            if ($existingTagihan) {
+                $existingTagihan->update([
+                    'status_bayar' => 'belum'
+                ]);
+            }
+
+            Tagihan::create([
+                'wajib_pajak_id' => $request->wajib_pajak_id,
+                'tahun' => $request->tahun,
+                'jumlah' => $request->jumlah,
+                'jatuh_tempo' => $request->jatuh_tempo,
+                'status_bayar' => 'belum'
             ]);
 
             DB::commit();
 
             return response()->json([
-                "status" => true,
-                "message" => "Data berhasil ditambahkan"
+                'status' => true,
+                'message' => 'Tagihan berhasil ditambahkan.'
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
 
             return response()->json([
-                "status" => false,
-                "message" => $e->getMessage()
+                'status' => false,
+                'message' => 'Gagal menyimpan tagihan: ' . $e->getMessage()
             ], 500);
         }
     }
-
-
 
     /**
      * Display the specified resource.
@@ -237,6 +254,26 @@ class TagihanController extends Controller
 
         return datatables()->of([])->make(true);
     }
+
+    public function getNopOptions(Request $request)
+    {
+        $search = $request->input('q');
+
+        $data = WajibPajak::query()
+            ->where('nop', 'like', "%{$search}%")
+            ->get();
+
+        $formatted = $data->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'text' => $item->nop // <-- PENTING: gunakan key 'text'
+            ];
+        });
+
+        return response()->json($formatted);
+    }
+
+
 
 
 

@@ -54,65 +54,41 @@ class WajibPajakController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request);
-        $request->validate([
-            'name' => 'required|string|max:30',
-            'nop' => 'required|string|size:18',
-            'alamat' => 'required|string',
-            'luas_bumi' => 'required|numeric|min:0',
-            'luas_bangunan' => 'required|numeric|min:0',
-            'jumlah_tagihan' => 'required|string',
-        ], [
-            'name.required' => 'Nama wajib diisi.',
-            'nop.required' => 'NOP wajib diisi.',
-            'nop.size' => 'NOP harus tepat 18 digit.',
-            'alamat.required' => 'Alamat wajib diisi.',
-            'luas_bumi.required' => 'Luas bumi wajib diisi.',
-            'luas_bumi.numeric' => 'Luas bumi harus berupa angka.',
-            'luas_bangunan.required' => 'Luas bangunan wajib diisi.',
-            'luas_bangunan.numeric' => 'Luas bangunan harus berupa angka.',
-            'jumlah_tagihan.required' => 'Jumlah tagihan wajib diisi.',
-        ]);
-
-
-
         try {
-
             DB::beginTransaction();
 
             $wajibPajak = $this->detailPajak->create([
-                "name" => $request->name,
-                "nop" => $request->nop,
-                "alamat" => $request->alamat,
-                "luas_bumi" => $request->luas_bumi,
-                "luas_bangunan" => $request->luas_bangunan,
-                "status_bayar" => 'belum'
+                'name' => $request->name,
+                'nop' => $request->nop,
+                'alamat' => $request->alamat,
+                'luas_bumi' => $request->luas_bumi,
+                'luas_bangunan' => $request->luas_bangunan,
+                'status_bayar' => 'belum'
             ]);
 
-            $jumlah = str_replace(['Rp', '.', ' '], '', $request->jumlah_tagihan);
-
             $wajibPajak->tagihans()->create([
-                'jumlah' => $jumlah,
-                'tahun' => now()->year,
+                'jumlah' => $request->jumlah,
+                'tahun' => $request->tahun,
+                'jatuh_tempo' => $request->jatuh_tempo,
                 'status_bayar' => 'belum'
             ]);
 
             DB::commit();
 
             return response()->json([
-                "status" => true,
-                "message" => "Data berhasil ditambahkan"
+                'status' => true,
+                'message' => 'Data berhasil ditambahkan'
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
 
             return response()->json([
-                "status" => false,
-                "message" => $e->getMessage()
+                'status' => false,
+                'message' => $e->getMessage()
             ], 500);
         }
-
     }
+
 
 
 

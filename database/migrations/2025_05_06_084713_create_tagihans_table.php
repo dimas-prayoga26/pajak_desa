@@ -13,13 +13,15 @@ return new class extends Migration
     {
         Schema::create('tagihans', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('wajib_pajak_id')->constrained()->onDelete('cascade'); // relasi ke wajib_pajaks
-            $table->year('tahun'); // tahun tagihan
-            $table->decimal('jumlah', 12, 2); // total tagihan PBB
-            $table->enum('status_bayar', ['belum', 'dibayar', 'dikonfirmasi'])->default('belum'); // status tagihan
+            $table->foreignId('wajib_pajak_id')->constrained()->onDelete('cascade'); 
+            $table->year('tahun'); 
+            $table->decimal('jumlah', 12, 2);
+            $table->enum('status_bayar', ['belum', 'dibayar', 'dikonfirmasi'])->default('belum');
+            $table->date('jatuh_tempo'); 
             $table->timestamps();
         });
     }
+
 
     public function down()
     {

@@ -38,6 +38,7 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::resource("detail-pajak", WajibPajakController::class);
 
         Route::get("/detail-tagihan/datatable", [TagihanController::class, "datatable"])->name("detail-tagihan.datatable");
+        Route::get('/detail-tagihan/nop-options', [TagihanController::class, 'getNopOptions'])->name('detail-pajak.nop-options');
         Route::resource("detail-tagihan", TagihanController::class);
 
         Route::get("/user/datatable", [UserController::class, "datatable"])->name("user.datatable");

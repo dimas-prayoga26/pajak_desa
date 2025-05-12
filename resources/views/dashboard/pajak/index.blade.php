@@ -113,13 +113,6 @@
                 <form id="tambahData">
                     <div class="modal-body">
 
-                        {{-- <div class="form-group">
-                    <label for="name" class="form-label">Nama</label>
-                    <select class="form-control" name="name" id="name">
-                        <option value="">Pilih salah satu</option>
-                    </select>                    
-                </div> --}}
-
                         <div class="form-group">
                             <label for="name">Nama</label>
                             <input type="text" class="form-control" id="name" name="name" placeholder="Nama">
@@ -148,18 +141,12 @@
                                 name="luas_bangunan" placeholder="Masukkan luas bangunan">
                         </div>
 
-                        <div class="form-group">
-                            <label for="jumlah_tagihan">Jumlah Tagihan Yang Di Tetapkan (Rp)</label>
-                            <input type="text" id="jumlah_tagihan" name="jumlah_tagihan" class="form-control"
-                                placeholder="Masukkan nominal tagihan" required>
-                        </div>
-
                     </div>
 
                     <div class="modal-footer">
                         <button type="reset" class="btn btn-danger btn-sm">Reset</button>
                         <button type="button" class="btn btn-primary btn-sm" id="simpanData">
-                            <i class="fe fe-save"></i> Simpan
+                            <i class="fe fe-save"></i> Selanjutnya
                         </button>
                     </div>
                 </form>
@@ -167,6 +154,45 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="modalTagihan" tabindex="-1" role="dialog" aria-labelledby="modalTagihanLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Input Tagihan</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <form id="formTagihan">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="tahun">Tahun</label>
+                            <input type="number" class="form-control" name="tahun" id="tahun" placeholder="Contoh: 2025">
+                        </div>
+                        <div class="form-group">
+                            <label for="jumlah">Jumlah Tagihan (Rp)</label>
+                            <input type="text" class="form-control" name="jumlah" id="jumlah" placeholder="Contoh: 500000">
+                        </div>
+                        <div class="form-group">
+                            <label for="jatuh_tempo">Jatuh Tempo</label>
+                            <input type="date" class="form-control" name="jatuh_tempo" id="jatuh_tempo">
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-warning btn-sm" id="btnSebelumnya">
+                            <i class="fe fe-arrow-left"></i> Sebelumnya
+                        </button>
+                        <button type="submit" class="btn btn-success btn-sm">Simpan</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
 
 
     <!-- End Modal Tambah Data -->
@@ -237,31 +263,6 @@
         </div>
     </div>
 
-    {{-- <div class="modal fade" id="modalTagihan" tabindex="-1" aria-labelledby="modalTagihanLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <form id="tagihanForm">
-              <div class="modal-header">
-                <h5 class="modal-title" id="modalTagihanLabel">Kirim Pemberitahuan</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                  <span>&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                <div class="form-group">
-                  <label for="jumlah_tagihan">Jumlah Tagihan (Rp)</label>
-                  <input type="text" id="jumlah_tagihan" name="jumlah_tagihan" class="form-control" placeholder="Masukkan jumlah tagihan" required>
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Batal</button>
-                <button type="submit" class="btn btn-primary btn-sm">Kirim</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div> --}}
-
     <div class="modal fade" id="modalDetail" tabindex="-1" aria-labelledby="modalDetailLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -324,36 +325,6 @@
     <script>
         $('.select2').select2();
 
-        // $('#modalTambahData').on('shown.bs.modal', function () {
-        //     $('#name').select2({
-        //         placeholder: 'Cari nama wajib pajak...',
-        //         allowClear: true,
-        //         width: '100%',
-        //         dropdownParent: $('#modalTambahData'),
-        //         ajax: {
-        //             url: "{{ route('detail-pajak.user-options') }}",
-        //             dataType: 'json',
-        //             delay: 250,
-        //             data: function (params) {
-        //                 return {
-        //                     q: params.term
-        //                 };
-        //             },
-        //             processResults: function (data) {
-        //                 return {
-        //                     results: data.map(function (item) {
-        //                         return {
-        //                             id: item.id,
-        //                             text: `${item.nama}`
-        //                         };
-        //                     })
-        //                 };
-        //             },
-        //             cache: true
-        //         }
-        //     });
-        // });
-
         var table;
 
         $(document).ready(function() {
@@ -364,10 +335,6 @@
                 autoWidth: false,
                 ajax: {
                     url: "{{ route('detail-pajak.datatable') }}",
-                    // data: function (d) {
-
-                    //     d.tahun = $('#filterTahun').val(); // ambil nilai filter tahun
-                    // }
                 },
                 columnDefs: [{
                         targets: 0,
@@ -401,19 +368,6 @@
                             }
                         }
                     },
-                    // {
-                    //     targets: 7,
-                    //     orderable: false,
-                    //     searchable: false,
-                    //     render: function (data, type, full, meta) {
-                    //         const isDisabled = full.user_id === null;
-                    //         return `
-                //             <div class="btn btn-success btn-sm ${isDisabled ? 'disabled' : ''}" onclick="handleKirimTagihan(${full.id}, ${isDisabled})">
-                //                 Kirim Pemberitahuan
-                //             </div>
-                //         `;
-                    //     }
-                    // },
                     {
                         targets: 7,
                         render: function(data, type, full, meta) {
@@ -474,16 +428,6 @@
                 lihatDetail(id);
             }
         }
-
-
-        // function handleKirimTagihan(id, isDisabled) {
-        //     if (isDisabled) {
-        //         toastr.warning("Pajak ini belum terealisasi");
-        //     } else {
-        //         kirimTagihan(id);
-        //     }
-        // }
-
 
         function lihatDetail(id) {
             $.ajax({
@@ -574,9 +518,6 @@
             });
         });
 
-
-
-
         function formatRupiah(angka, prefix) {
             let number_string = angka.replace(/[^,\d]/g, '').toString(),
                 split = number_string.split(','),
@@ -591,45 +532,6 @@
 
             return prefix ? prefix + ' ' + rupiah : rupiah;
         }
-
-        // function kirimTagihan(id) {
-        //     $('#modalTagihan').modal('show');
-        //     $('#tagihanForm').data('id', id);
-        //     $('#jumlah_tagihan').val('');
-
-        //     $('#jumlah_tagihan').off('input').on('input', function () {
-        //         let val = $(this).val();
-        //         $(this).val(formatRupiah(val, 'Rp'));
-        //     });
-        // }
-
-        // $('#tagihanForm').on('submit', function(e) {
-        //     e.preventDefault();
-
-        //     let id = $(this).data('id');
-        //     let jumlah = $('#jumlah_tagihan').val().replace(/[^0-9]/g, '');
-
-        //     $.ajax({
-        //         url: `/super-admin/detail-pajak/${id}/kirim`,
-        //         type: 'POST',
-        //         data: { 
-        //             id: id,
-        //             jumlah_tagihan: jumlah
-        //         },
-        //         headers: {
-        //             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        //         },
-        //         success: function(response) {
-        //             toastr.success(response.message || 'Tagihan berhasil dikirim');
-        //             $('#modalTagihan').modal('hide');
-        //             table.ajax.reload();
-        //         },
-        //         error: function(xhr) {
-        //             let msg = xhr.responseJSON?.message || 'Terjadi kesalahan';
-        //             toastr.error(msg);
-        //         }
-        //     });
-        // });
 
         function editData(id) {
             console.log(id);
@@ -659,31 +561,6 @@
                 }
             });
         }
-
-        // function NameOptions(selectedId = null) {
-        //     $.ajax({
-        //         url: "{{ route('detail-pajak.user-options') }}",
-        //         type: 'GET',
-        //         dataType: 'json',
-        //         success: function (response) {
-        //             const $select = $('#edit_user_id');
-        //             $select.empty().append('<option value="">Pilih nama wajib pajak</option>');
-
-        //             $.each(response, function (i, item) {
-        //                 console.log(item);
-
-        //                 $select.append(`<option value="${item.id}">${item.nama}</option>`);
-        //             });
-
-        //             if (selectedId) {
-        //                 $select.val(selectedId).trigger('change');
-        //             }
-        //         },
-        //         error: function () {
-        //             toastr.error('Tidak dapat mengambil data user dari server.', 'Gagal');
-        //         }
-        //     });
-        // }
 
         function hapusData(id) {
             Swal.fire({
@@ -721,52 +598,133 @@
         }
 
 
-        $('#jumlah_tagihan').on('keyup', function () {
+        $('#jumlah').on('keyup', function () {
             let val = $(this).val();
             $(this).val(formatRupiah(val, 'Rp'));
         });
 
+        $('#btnSebelumnya').on('click', function () {
+            $('#modalTagihan').modal('hide'); 
+            $('#modalTambahData').modal('show');
+        });
 
-        $("#simpanData").on("click", function(e) {
+
+        let dataWajibPajak = {};
+
+        $('#simpanData').on('click', function () {
+            // Ambil nilai dari for m
+            const name = $('#name').val().trim();
+            const nop = $('#nop').val().trim();
+            const alamat = $('#alamat').val().trim();
+            const luas_bumi = $('#luas_bumi').val().trim();
+            const luas_bangunan = $('#luas_bangunan').val().trim();
+
+            $('#tambahData input, #tambahData textarea').removeClass('is-invalid');
+
+            if (name.length < 5) {
+                $('#name').addClass('is-invalid');
+                toastr.warning('Nama minimal 5 karakter.');
+                return;
+            }
+            if (!/^\d{18}$/.test(nop)) {
+                $('#nop').addClass('is-invalid');
+                toastr.warning('NOP harus terdiri dari 18 digit angka.');
+                return;
+            }
+
+            if (!alamat) {
+                $('#alamat').addClass('is-invalid');
+                toastr.warning('Alamat wajib diisi.');
+                return;
+            }
+
+            if (!luas_bumi || isNaN(luas_bumi) || parseFloat(luas_bumi) <= 0) {
+                $('#luas_bumi').addClass('is-invalid');
+                toastr.warning('Luas bumi harus diisi dan bernilai positif.');
+                return;
+            }
+
+            if (!luas_bangunan || isNaN(luas_bangunan) || parseFloat(luas_bangunan) <= 0) {
+                $('#luas_bangunan').addClass('is-invalid');
+                toastr.warning('Luas bangunan harus diisi.');
+                return;
+            }
+
+            dataWajibPajak = {
+                name,
+                nop,
+                alamat,
+                luas_bumi,
+                luas_bangunan,
+            };
+
+            $('#modalTambahData').modal('hide');
+            $('#modalTagihan').modal('show');
+        });
+
+
+        $('#formTagihan').on('submit', function (e) {
             e.preventDefault();
 
-            let formData = {
-                name: $("#name").val(),
-                nop: $("#nop").val(),
-                alamat: $("#alamat").val(),
-                luas_bumi: $("#luas_bumi").val(),
-                luas_bangunan: $("#luas_bangunan").val(),
-                jumlah_tagihan: $("#jumlah_tagihan").val(),
+            const tahun = $('#tahun').val().trim();
+            const jumlahFormatted  = $('#jumlah').val().trim();
+            const jatuh_tempo = $('#jatuh_tempo').val().trim();
+
+            const jumlahCleaned = jumlahFormatted.replace(/[^0-9]/g, '');
+            const jumlahAngka = parseFloat(jumlahCleaned);
+
+            $('#formTagihan input').removeClass('is-invalid');
+
+            const currentYear = new Date().getFullYear();
+            if (!/^\d{4}$/.test(tahun) || tahun < 2000 || tahun > currentYear + 5) {
+                $('#tahun').addClass('is-invalid');
+                toastr.warning('Tahun harap diisi');
+                return;
+            }
+
+            if (!jumlahCleaned || isNaN(jumlahAngka) || jumlahAngka <= 0) {
+                $('#jumlah').addClass('is-invalid');
+                toastr.warning('Jumlah tagihan harap diisi');
+                return;
+            }
+
+            if (!jatuh_tempo) {
+                $('#jatuh_tempo').addClass('is-invalid');
+                toastr.warning('Tanggal jatuh harap diisi.');
+                return;
+            }
+
+            const dataTagihan = {
+                tahun,
+                jumlah: jumlahAngka,
+                jatuh_tempo
             };
+
+            const dataGabungan = { ...dataWajibPajak, ...dataTagihan };
 
             $.ajax({
                 url: "{{ url('super-admin/detail-pajak') }}",
-                type: "POST",
-                data: formData,
+                type: 'POST',
+                data: dataGabungan,
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                success: function(response) {
+                success: function (response) {
                     if (response.status === true) {
-                        toastr.success(response.message || 'Data berhasil diproses.', 'Berhasil');
-
-                        $("#tambahData")[0].reset();
-
-                        $('#modalTambahData').modal('hide');
-
+                        toastr.success(response.message || 'Data berhasil disimpan!');
+                        $('#modalTagihan').modal('hide');
+                        $('#tambahData')[0].reset();
+                        $('#formTagihan')[0].reset();
                         table.ajax.reload();
                     } else {
                         toastr.warning(response.message || 'Data tidak berhasil diproses.', 'Peringatan');
                     }
                 },
-                error: function(xhr) {
-                    const message = xhr.responseJSON?.message || 'Terjadi kesalahan saat menyimpan data.';
-                    toastr.error(message, 'Gagal');
+                error: function () {
+                    toastr.error('Gagal menyimpan data');
                 }
             });
         });
-
-
 
         $("#updateData").on("click", function(e) {
             e.preventDefault();

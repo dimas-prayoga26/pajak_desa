@@ -35,18 +35,31 @@
             <div class="card custom-card">
                 <div class="card-header">
                     <div class="row w-100 align-items-center">
-                        <!-- Kolom kiri: Judul & Filter Tahun -->
-                        <div class="col-md-9 d-flex align-items-center gap-2">
+                        <!-- Kolom kiri: Judul -->
+                        <div class="col-md-6 d-flex align-items-center gap-2">
                             <h3 class="card-title mb-0 mr-2">Data Detail Tagihan</h3>
                         </div>
+
                         @role('superAdmin')
-                        <div class="col-md-3 text-right">
-                            <input type="text" id="searchNop" class="form-control form-control-sm" placeholder="Cari berdasarkan NOP">
+                        <!-- Kolom kanan: Search NOP + Tombol Tambah -->
+                        <div class="col-md-6 d-flex justify-content-end align-items-center gap-2">
+                            <input type="text" id="searchNop" class="form-control form-control-sm w-auto mr-2" placeholder="Cari berdasarkan NOP">
+
+                            <button 
+                                type="button" 
+                                class="btn btn-primary btn-sm ml-2" 
+                                id="btnTambahTagihan" 
+                                data-toggle="modal" 
+                                data-target="#modalTambahTagihan"
+                            >
+                                <i class="fe fe-plus"></i> Tambah Tagihan
+                            </button>
+
                         </div>
                         @endrole
-
                     </div>
                 </div>
+
                 <div class="card-body">
                     <table id="datatable" class="table table-bordered text-nowrap w-100">
                         <thead>
@@ -73,6 +86,55 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="modalTambahTagihan" tabindex="-1" role="dialog" aria-labelledby="modalLabelTagihan" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <form id="formTambahTagihan">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalLabelTagihan">Tambah Tagihan</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form id="formTagihan">
+                        <div class="modal-body">
+
+                            <div class="form-group">
+                                <label for="nop" class="form-label">Nop</label>
+                                <select class="form-control" name="nop" id="nop">
+                                    <option value="">Cari NOP</option>
+                                </select>    
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tahun">Tahun</label>
+                                <input type="number" class="form-control" name="tahun" id="tahun" placeholder="Contoh: 2025">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="jumlah">Jumlah Tagihan (Rp)</label>
+                                <input type="text" class="form-control" name="jumlah" id="jumlah" placeholder="Contoh: 500000">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="jatuh_tempo">Jatuh Tempo</label>
+                                <input type="date" class="form-control" name="jatuh_tempo" id="jatuh_tempo">
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="reset" class="btn btn-danger btn-sm">Reset</button>
+                            <button type="button" class="btn btn-primary btn-sm" id="simpanData">
+                                <i class="fe fe-save"></i> Simpan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </form>
+        </div>
+        </div>
+
 
     <div class="modal fade" id="modalEditData" tabindex="-1" aria-labelledby="modalEditDataLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -125,6 +187,32 @@
     <script>
 
         $('.select2').select2();
+
+        $('#modalTambahTagihan').on('shown.bs.modal', function () {
+            $('#nop').select2({
+                placeholder: 'Cari NOP...',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: $('#modalTambahTagihan'),
+                ajax: {
+                    url: "{{ route('detail-pajak.nop-options') }}",
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            q: params.term
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                    cache: true
+                }
+            });
+        });
+
         var table;
 
         let debounceTimer;
@@ -427,6 +515,46 @@
                 error: function(xhr) {
                     let msg = xhr.responseJSON?.message || 'Terjadi kesalahan';
                     toastr.error(msg);
+                }
+            });
+        });
+
+        $('#jumlah').on('keyup', function () {
+            let val = $(this).val();
+            $(this).val(formatRupiah(val, 'Rp'));
+        });
+
+        $("#simpanData").on("click", function (e) {
+            e.preventDefault();
+
+            let formData = new FormData();
+            formData.append("wajib_pajak_id", $("#nop").val());
+            formData.append("tahun", $("#tahun").val());
+            formData.append("jumlah", $("#jumlah").val());
+            formData.append("jatuh_tempo", $("#jatuh_tempo").val());
+
+            $.ajax({
+                url: "{{ url('super-admin/detail-tagihan') }}",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function (response) {
+                    if (response.status === true) {
+                        toastr.success(response.message, 'Berhasil');
+                        $("#formTagihan")[0].reset();
+                        $('#modalTambahTagihan').modal('hide');
+                        table.ajax.reload();
+                    } else {
+                        toastr.warning(response.message || 'Data tidak berhasil diproses.', 'Peringatan');
+                    }
+                },
+                error: function (xhr) {
+                    const message = xhr.responseJSON?.message || 'Terjadi kesalahan saat menyimpan data.';
+                    toastr.error(message, 'Gagal');
                 }
             });
         });
