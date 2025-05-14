@@ -1,10 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\TagihanController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\TagihanController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\WajibPajakController;
 
 Route::redirect('', '/auth/login');
@@ -16,6 +17,8 @@ Route::group(["middleware" => ["guest"]], function() {
     });
 });
 
+Route::get('pajak-tagihan/bayar/{id}', [PembayaranController::class, 'snapToken']);
+Route::post('pajak-tagihan/midtrans/callback', [PembayaranController::class, 'notificationHandler']);
 
 Route::middleware(['web', 'auth'])->group(function () {
 

@@ -34,9 +34,9 @@
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item active">Detail Akun</li>
                     </ol>
-                </div> 
+                </div>
             </div>
-        </div><!-- /.container-fluid -->
+        </div>
     </section>
 
     <div class="row">
@@ -44,20 +44,13 @@
             <div class="card custom-card">
                 <div class="card-header">
                     <div class="row w-100 align-items-center">
-                        <!-- Kolom kiri: Judul & Filter Tahun -->
+
                         <div class="col-md-6 d-flex align-items-center gap-2">
                             <h3 class="card-title mb-0 mr-2">Data Detail Akun</h3>
-                            {{-- <select class="form-control form-control-sm w-auto ml-3" id="filterTahun" name="tahun">
-                                <option value="">Semua Tahun</option>
-                                @foreach($tahunList as $tahun)
-                                    <option value="{{ $tahun }}" {{ $tahun == $tahunTerpilih ? 'selected' : '' }}>
-                                        {{ $tahun }}
-                                    </option>
-                                @endforeach
-                            </select> --}}
+                            
                         </div>
-                
-                        <!-- Kolom kanan: Tombol Tambah Data -->
+
+
                         <div class="col-md-6 text-right">
                             <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalTambahData">
                                 <i class="fas fa-plus-circle"></i> Tambah Data
@@ -65,13 +58,8 @@
                         </div>
                     </div>
                 </div>
+
                 
-                {{-- <div class="prism-toggle">
-                    <button type="button" class="btn btn-sm btn-primary-light" data-bs-toggle="modal"
-                        data-bs-target="#modalTambahData">
-                        Tambah Data
-                    </button>
-                </div> --}}
                 <div class="card-body">
                     <table id="datatable" class="table table-bordered text-nowrap w-100">
                         <thead>
@@ -95,46 +83,46 @@
         </div>
     </div>
 
-    <!-- Modal Tambah Data -->
+
     <div class="modal fade" id="modalTambahData" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
-      
+
             <div class="modal-header">
               <h5 class="modal-title" id="modalLabel">Tambah Data</h5>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
-      
+
             <form id="tambahData" enctype="multipart/form-data">
               <div class="modal-body">
-      
+
                 <div class="form-group">
                   <label for="nama">Nama</label>
                   <input type="text" class="form-control" id="nama" name="nama" placeholder="Masukkan nama lengkap">
                 </div>
-      
+
                 <div class="form-group">
                   <label for="email">Email</label>
                   <input type="email" class="form-control" id="email" name="email" placeholder="Masukkan email">
                 </div>
-      
+
                 <div class="form-group">
                   <label for="username">Username</label>
                   <input type="text" class="form-control" id="username" name="username" placeholder="Masukkan username">
                 </div>
-      
+
                 <div class="form-group">
                   <label for="password">Password</label>
                   <input type="password" class="form-control" id="password" name="password" placeholder="Masukkan password">
                 </div>
-      
+
                 <div class="form-group">
                   <label for="no_hp">Nomor HP</label>
                   <input type="text" class="form-control" id="no_hp" name="no_hp" placeholder="Masukkan nomor HP">
                 </div>
-      
+
                 <div class="form-group">
                   <label for="tanggal_lahir">Tanggal Lahir</label>
                   <div class="input-group">
@@ -144,7 +132,7 @@
                     <input type="text" class="form-control" id="tanggal_lahir" name="tanggal_lahir" placeholder="dd/mm/yyyy" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" data-mask>
                   </div>
                 </div>
-      
+
                 <div class="form-group">
                   <label for="jenis_kelamin">Jenis Kelamin</label>
                   <select class="form-control" name="jenis_kelamin" id="jenis_kelamin">
@@ -153,12 +141,12 @@
                     <option value="Perempuan">Perempuan</option>
                   </select>
                 </div>
-      
+
                 <div class="form-group">
                   <label for="alamat">Alamat</label>
                   <textarea class="form-control" id="alamat" name="alamat" rows="3" placeholder="Masukkan alamat lengkap"></textarea>
                 </div>
-      
+
                 <div class="form-group">
                     <label for="file_upload">Foto Profile</label>
                     <div class="input-group">
@@ -171,10 +159,10 @@
                         </div>
                     </div>
                 </div>
-                
-      
+
+
               </div>
-      
+
               <div class="modal-footer">
                 <button type="reset" class="btn btn-danger btn-sm">Reset</button>
                 <button type="button" class="btn btn-primary btn-sm" id="simpanData">
@@ -182,55 +170,55 @@
                 </button>
               </div>
             </form>
-      
+
           </div>
         </div>
       </div>
-      
-      
-      
-    <!-- End Modal Tambah Data -->
+
+
+
+
 
     <div class="modal fade" id="modalEditData" tabindex="-1" aria-labelledby="modalEditDataLabel" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
-      
+
             <div class="modal-header">
               <h6 class="modal-title" id="modalEditDataLabel">Edit Data</h6>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
-      
+
             <form id="editData" enctype="multipart/form-data">
               <div class="modal-body">
-      
+
                 <div class="form-group">
                   <label for="edit_nama">Nama</label>
                   <input type="text" class="form-control" id="edit_nama" name="nama" placeholder="Masukkan nama lengkap">
                 </div>
-      
+
                 <div class="form-group">
                   <label for="edit_email">Email</label>
                   <input type="email" class="form-control" id="edit_email" name="email" placeholder="Masukkan email">
                 </div>
-      
+
                 <div class="form-group">
                   <label for="edit_username">Username</label>
                   <input type="text" class="form-control" id="edit_username" name="username" placeholder="Masukkan username">
                 </div>
-      
+
                 <div class="form-group">
                   <label for="edit_password">Password</label>
                   <input type="password" class="form-control" id="edit_password" name="password" placeholder="Masukkan password baru">
                   <small class="text-muted">Kosongkan jika tidak ingin mengubah password</small>
                 </div>
-      
+
                 <div class="form-group">
                   <label for="edit_no_hp">Nomor HP</label>
                   <input type="text" class="form-control" id="edit_no_hp" name="no_hp" placeholder="Masukkan nomor HP">
                 </div>
-      
+
                 <div class="form-group">
                   <label for="edit_tanggal_lahir">Tanggal Lahir</label>
                   <div class="input-group">
@@ -240,7 +228,7 @@
                     <input type="text" class="form-control" id="edit_tanggal_lahir" name="tanggal_lahir" placeholder="dd/mm/yyyy" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" data-mask>
                   </div>
                 </div>
-      
+
                 <div class="form-group">
                   <label for="edit_jenis_kelamin">Jenis Kelamin</label>
                   <select class="form-control" name="jenis_kelamin" id="edit_jenis_kelamin">
@@ -249,12 +237,12 @@
                     <option value="Perempuan">Perempuan</option>
                   </select>
                 </div>
-      
+
                 <div class="form-group">
                   <label for="edit_alamat">Alamat</label>
                   <textarea class="form-control" id="edit_alamat" name="alamat" rows="3" placeholder="Masukkan alamat lengkap"></textarea>
                 </div>
-      
+
                 <div class="form-group">
                   <label for="edit_file">Foto Profile</label>
                   <div id="edit_photo_preview">
@@ -270,9 +258,9 @@
                     </div>
                   </div>
                 </div>
-      
+
               </div>
-      
+
               <div class="modal-footer">
                 <button type="reset" class="btn btn-danger btn-sm" id="resetEditData">Reset</button>
                 <button type="button" class="btn btn-primary btn-sm" id="updateData">
@@ -280,12 +268,12 @@
                 </button>
               </div>
             </form>
-      
+
           </div>
         </div>
       </div>
 
-    <!-- End -->
+
 
 @endsection
 
@@ -304,15 +292,15 @@
     <script src="plugins/datatables-buttons/js/buttons.print.min.js"></script>
     <script src="plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.js" 
-        integrity="sha256-yE5LLp5HSQ/z+hJeCqkz9hdjNkk1jaiGG0tDCraumnA=" 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.js"
+        integrity="sha256-yE5LLp5HSQ/z+hJeCqkz9hdjNkk1jaiGG0tDCraumnA="
         crossorigin="anonymous"></script>
 
 
     <script>
 
         $(function () {
-            $('input[name="tanggal_lahir"]').mask('00/00/0000'); 
+            $('input[name="tanggal_lahir"]').mask('00/00/0000');
 
             $(document).on('change', '.custom-file-input', function (e) {
                 if (e.target.files.length > 0) {
@@ -339,7 +327,7 @@
                         targets: 0,
                         render: function (data, type, full, meta) {
                             console.log(full);
-                            
+
                             return meta.row + 1;
                         }
                     },
@@ -383,7 +371,7 @@
 
         $("#no_hp").on('input', function() {
             var value = $(this).val();
-            
+
             value = value.replace(/[^0-9]/g, '');
             $(this).val(value);
 
@@ -392,7 +380,7 @@
             }
         });
 
-        
+
         function editData(id) {
             $.ajax({
                 url: "{{ url('super-admin/user') }}/" + id,
@@ -486,11 +474,11 @@
             e.preventDefault();
 
             var nomorHp = $("#no_hp").val();
-            var phoneRegex = /^[0-9]{10,13}$/; 
+            var phoneRegex = /^[0-9]{10,13}$/;
             if (!phoneRegex.test(nomorHp)) {
                 toastr.warning('Nomor HP harus berupa angka dengan panjang 10 hingga 13 digit.', 'Peringatan');
                 $('#no_hp').focus();
-                return; 
+                return;
             }
 
             let formData = new FormData();
@@ -510,11 +498,11 @@
             }
 
             $.ajax({
-                url: "{{ url('super-admin/user') }}", 
+                url: "{{ url('super-admin/user') }}",
                 type: "POST",
                 data: formData,
                 processData: false,
-                contentType: false, 
+                contentType: false,
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
@@ -589,10 +577,5 @@
                 }
             });
         });
-
-
-
-
-
     </script>
 @endsection

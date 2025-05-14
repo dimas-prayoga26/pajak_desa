@@ -75,6 +75,9 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+        <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-DneiADssytuGoCMX"></script>
+
+        {{-- <script src="https://app.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-DneiADssytuGoCMX"></script> --}}
 
         <script src="plugins/jquery/jquery.min.js"></script>
         <!-- Bootstrap 4 -->

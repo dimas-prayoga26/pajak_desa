@@ -6,13 +6,12 @@ use App\Models\Tagihan;
 use App\Models\WajibPajak;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class TagihanController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     protected $detailTagihan;
 
     public function __construct()
@@ -22,24 +21,20 @@ class TagihanController extends Controller
 
     public function index(Request $request)
     {
-        
+
 
         return view('dashboard.tagihan.index');
     }
 
 
 
-    /**
-     * Show the form for creating a new resource.
-     */
+
     public function create()
     {
-        //
+
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
     public function store(Request $request)
     {
         $request->merge([
@@ -97,12 +92,10 @@ class TagihanController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
+
     public function show($id)
     {
-        // dd($id);
+
         try {
 
             DB::beginTransaction();
@@ -128,17 +121,13 @@ class TagihanController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+
     public function edit(string $id)
     {
-        //
+
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -148,7 +137,7 @@ class TagihanController extends Controller
         try {
             DB::beginTransaction();
 
-            // Update jumlah tagihan
+
             Tagihan::where('id', $id)->update([
                 'jumlah' => $request->jumlah,
             ]);
@@ -170,9 +159,7 @@ class TagihanController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+
     public function destroy($id)
     {
         try {
@@ -207,73 +194,96 @@ class TagihanController extends Controller
 
 
     public function datatable(Request $request)
-    {
-        $user = auth()->user();
+{
+    $user = auth()->user();
+    $nop = $request->nop; // ambil NOP dari request
 
-        // SUPER ADMIN
-        if ($user->hasRole('superAdmin')) {
-            $nop = $request->nop;
-
-            if (strlen($nop) !== 18) {
-                return datatables()->of([])->make(true);
-            }
-
-            $exists = WajibPajak::where('nop', 'like', '%' . $nop . '%')->exists();
-
-            if (!$exists) {
-                $data = datatables()->of([])->make(true)->getData(true);
-                return response()->json(array_merge($data, [
-                    'status' => false,
-                    'type' => 'error',
-                    'message' => 'NOP tidak ditemukan.'
-                ]));
-            }
-
-            $query = Tagihan::with('wajibPajak.user.biodata')
-                ->whereHas('wajibPajak', function ($q) use ($nop) {
-                    $q->where('nop', 'like', '%' . $nop . '%');
-                });
-
-            return datatables()->of($query)
-                ->addIndexColumn()
-                ->make(true);
+    if ($user->hasRole('superAdmin')) {
+        if (strlen($nop) !== 18) {
+            return datatables()->of([])->make(true);
         }
 
+        $exists = WajibPajak::where('nop', 'like', '%' . $nop . '%')->exists();
 
-        // WARGA
-        elseif ($user->hasRole('warga')) {
-            $query = Tagihan::with('wajibPajak.user.biodata')
-                ->whereHas('wajibPajak', function ($q) use ($user) {
-                    $q->where('user_id', $user->id);
-                });
-
-            return datatables()->of($query)
-                ->addIndexColumn()
-                ->make(true);
+        if (!$exists) {
+            $data = datatables()->of([])->make(true)->getData(true);
+            return response()->json(array_merge($data, [
+                'status' => false,
+                'type' => 'error',
+                'message' => 'NOP tidak ditemukan.'
+            ]));
         }
 
-        return datatables()->of([])->make(true);
+        $query = Tagihan::with('wajibPajak.user.biodata')
+            ->whereHas('wajibPajak', function ($q) use ($nop) {
+                $q->where('nop', 'like', '%' . $nop . '%');
+            });
+
+        return datatables()->of($query)
+            ->addIndexColumn()
+            ->make(true);
     }
+
+    // ✅ Perbaiki bagian warga → pakai juga NOP untuk filter
+    if ($user->hasRole('warga')) {
+        // dd($nop);
+        if (!$nop) {
+            return datatables()->of([])->make(true); // kalau belum pilih NOP
+        }
+
+        $query = Tagihan::with('wajibPajak.user.biodata')
+            ->whereHas('wajibPajak', function ($q) use ($user, $nop) {
+                $q->where('user_id', $user->id)
+                  ->where('nop', 'like', '%' . $nop . '%'); // filter berdasarkan NOP juga
+            });
+
+        return datatables()->of($query)
+            ->addIndexColumn()
+            ->make(true);
+    }
+
+    return datatables()->of([])->make(true);
+}
+
 
     public function getNopOptions(Request $request)
     {
         $search = $request->input('q');
+        $user = Auth::user();
 
-        $data = WajibPajak::query()
-            ->where('nop', 'like', "%{$search}%")
-            ->get();
+        $query = WajibPajak::query();
 
-        $formatted = $data->map(function ($item) {
-            return [
-                'id' => $item->id,
-                'text' => $item->nop // <-- PENTING: gunakan key 'text'
-            ];
+        if ($user->hasRole('warga')) {
+            $query->where('user_id', $user->id);
+        }
+
+        if ($search) {
+            $query->where('nop', 'like', "%{$search}%");
+        }
+
+        $data = $query->limit(10)->get();
+
+
+        $formatted = $data->map(function ($item) use ($user) {
+            if ($user->hasRole('admin')) {
+
+                return [
+                    'id' => $item->id,
+                    'text' => $item->nop
+                ];
+            } else {
+
+                return [
+                    'id' => $item->nop,
+                    'text' => $item->nop
+                ];
+            }
         });
+
+        // dd($formatted);
 
         return response()->json($formatted);
     }
-
-
 
 
 

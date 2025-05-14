@@ -15,9 +15,14 @@
                     @role('superAdmin')
                         <h1 class="my-auto page-title">Detail Tagihan</h1>
                     @else
-                        <h1 class="my-auto page-title">
-                            Detail Tagihan NOP: {{ Auth::user()->pajaks->nop ?? '-' }}
-                        </h1>
+                        <div class="d-flex align-items-center" style="gap: 10px;">
+                            <h1 class="page-title mb-0" style="font-size: 1.25rem;">Lihat Detail Tagihan NOP:</h1>
+                            <div style="min-width: 300px;">
+                                <select class="form-control" name="selectNop" id="selectNop">
+                                    <option></option>
+                                </select>
+                            </div>
+                        </div>
                     @endrole
 
                 </div>
@@ -25,9 +30,9 @@
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item active">Detail Tagihan</li>
                     </ol>
-                </div> 
+                </div>
             </div>
-        </div><!-- /.container-fluid -->
+        </div>
     </section>
 
     <div class="row">
@@ -35,21 +40,21 @@
             <div class="card custom-card">
                 <div class="card-header">
                     <div class="row w-100 align-items-center">
-                        <!-- Kolom kiri: Judul -->
+
                         <div class="col-md-6 d-flex align-items-center gap-2">
                             <h3 class="card-title mb-0 mr-2">Data Detail Tagihan</h3>
                         </div>
 
                         @role('superAdmin')
-                        <!-- Kolom kanan: Search NOP + Tombol Tambah -->
+
                         <div class="col-md-6 d-flex justify-content-end align-items-center gap-2">
                             <input type="text" id="searchNop" class="form-control form-control-sm w-auto mr-2" placeholder="Cari berdasarkan NOP">
 
-                            <button 
-                                type="button" 
-                                class="btn btn-primary btn-sm ml-2" 
-                                id="btnTambahTagihan" 
-                                data-toggle="modal" 
+                            <button
+                                type="button"
+                                class="btn btn-primary btn-sm ml-2"
+                                id="btnTambahTagihan"
+                                data-toggle="modal"
                                 data-target="#modalTambahTagihan"
                             >
                                 <i class="fe fe-plus"></i> Tambah Tagihan
@@ -104,19 +109,19 @@
                                 <label for="nop" class="form-label">Nop</label>
                                 <select class="form-control" name="nop" id="nop">
                                     <option value="">Cari NOP</option>
-                                </select>    
+                                </select>
                             </div>
 
                             <div class="form-group">
                                 <label for="tahun">Tahun</label>
                                 <input type="number" class="form-control" name="tahun" id="tahun" placeholder="Contoh: 2025">
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="jumlah">Jumlah Tagihan (Rp)</label>
                                 <input type="text" class="form-control" name="jumlah" id="jumlah" placeholder="Contoh: 500000">
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="jatuh_tempo">Jatuh Tempo</label>
                                 <input type="date" class="form-control" name="jatuh_tempo" id="jatuh_tempo">
@@ -162,8 +167,8 @@
           </div>
         </div>
       </div>
-      
-      
+
+
 
 @endsection
 
@@ -187,6 +192,28 @@
     <script>
 
         $('.select2').select2();
+
+        $('#selectNop').select2({
+            placeholder: 'Cari NOP...',
+            allowClear: true,
+            width: '100%',
+            ajax: {
+                url: "{{ route('detail-pajak.nop-options') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        q: params.term
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data
+                    };
+                },
+                cache: true
+            }
+        });
 
         $('#modalTambahTagihan').on('shown.bs.modal', function () {
             $('#nop').select2({
@@ -331,7 +358,7 @@
                     }
                 },
                 {
-                    targets: 4, // ganti sesuai posisi kolom aksi di tabelmu
+                    targets: 4,
                     render: function (data, type, full, meta) {
                         let tombol = '';
 
@@ -377,7 +404,10 @@
                 ajax: {
                     url: "{{ route('detail-tagihan.datatable') }}",
                     data: function (d) {
-                        d.nop = $('#searchNop').val();
+                        const searchNop = $('#searchNop').val();
+                        const selectNop = $('#selectNop').val();
+
+                        d.nop = searchNop || selectNop;
                     },
                     dataSrc: function (json) {
                         const validTypes = ['success', 'error', 'warning', 'info'];
@@ -391,7 +421,7 @@
                     },
                 },
                 columnDefs: columnDefs,
-                
+
                 columns: columns,
                 language: {
                     searchPlaceholder: 'Cari NOP',
@@ -404,9 +434,52 @@
                 clearTimeout(debounceTimer);
                 debounceTimer = setTimeout(function () {
                     table.ajax.reload();
-                }, 500); // hanya reload 500ms setelah user berhenti mengetik
+                }, 500);
+            });
+
+            $('#selectNop').on('change', function () {
+                table.ajax.reload();
             });
         });
+
+        function bayarTagihan(tagihanId) {
+
+            const url = "{{ url('pajak-tagihan/bayar') }}/" + tagihanId;
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function (response) {
+                    if (response.snap_token) {
+                        snap.pay(response.snap_token, {
+                            onSuccess: function (result) {
+                                console.log('Pembayaran berhasil:', result);
+                                toastr.success('Pembayaran berhasil.');
+                                $('#datatable').DataTable().ajax.reload();
+                            },
+                            onPending: function (result) {
+                                console.log('Menunggu pembayaran:', result);
+                                toastr.info('Menunggu penyelesaian pembayaran.');
+                                $('#datatable').DataTable().ajax.reload();
+                            },
+                            onError: function (result) {
+                                console.error('Pembayaran gagal:', result);
+                                toastr.error('Pembayaran gagal.');
+                            },
+                            onClose: function () {
+                                toastr.info('Kamu menutup popup pembayaran.');
+                            }
+                        });
+                    } else {
+                        toastr.error('Gagal memulai pembayaran.');
+                    }
+                },
+                error: function (xhr) {
+                    toastr.error('Terjadi kesalahan saat memproses pembayaran.');
+                }
+            });
+        }
+
 
         function formatRupiah(angka, prefix = 'Rp') {
             let number_string = angka.toString().replace(/[^,\d]/g, ''),
@@ -494,10 +567,10 @@
 
         $('#updateData').on('click', function(e) {
             e.preventDefault();
-            
+
             let id = $("#editData").data('id');
             let jumlah = $('#edit_jumlah_tagihan').val();
-            let cleanedJumlah = unformatRupiah(jumlah); // Hapus Rp dan titik
+            let cleanedJumlah = unformatRupiah(jumlah);
 
             $.ajax({
                 url: `/super-admin/detail-tagihan/${id}`,

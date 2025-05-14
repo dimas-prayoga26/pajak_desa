@@ -373,9 +373,6 @@
                         render: function(data, type, full, meta) {
                             const isDisabled = full.user_id === null;
                             return `
-                                <button type="button" class="btn btn-info btn-sm ${isDisabled ? 'disabled' : ''}" onclick="handleDetail(${full.id}, ${isDisabled})">
-                                    <i class="fe fe-eye"></i> Detail
-                                </button>
                                 <button type="button" class="btn btn-warning btn-sm" onclick="editData(${data})">
                                     <i class="fe fe-edit"></i> Edit
                                 </button>
@@ -420,59 +417,6 @@
                 }
             });
         });
-
-        function handleDetail(id, isDisabled) {
-            if (isDisabled) {
-                toastr.warning("Pajak ini belum terealisasi");
-            } else {
-                lihatDetail(id);
-            }
-        }
-
-        function lihatDetail(id) {
-            $.ajax({
-                url: `/super-admin/detail-pajak/tagihan/${id}`,
-                type: 'GET',
-                success: function(response) {
-                    console.log(response.data[0].id); // cek id pertama
-
-                    if (response.data.length > 0) {
-                        $('#confirmation').attr('data-id', response.data[0].id);
-                    }
-
-                    if (response.status) {
-                        $('#modalNamaUser').text(response.nama);
-
-                        let rows = '';
-                        response.data.forEach((tagihan, index) => {
-                            rows += `
-                                <tr>
-                                    <td>${index + 1}</td>
-                                    <td>${tagihan.tahun}</td>
-                                    <td>Rp ${parseInt(tagihan.jumlah).toLocaleString('id-ID')}</td>
-                                    <td>
-                                        ${tagihan.status_bayar === 'dibayar'
-                                            ? '<span class="badge badge-success">Sudah Dibayar</span>'
-                                            : '<span class="badge badge-warning">Belum Dibayar</span>'}
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-sm btn-info" onclick="lihatDetailTagihan(${tagihan.id})">
-                                            <i class="fa fa-eye"></i> Lihat Detail
-                                        </button>
-                                    </td>
-                                </tr>`;
-                        });
-
-                        $('#detailTagihanBody').html(rows);
-                        $('#modalDetail').modal('show');
-                    }
-                },
-                error: function() {
-                    toastr.error("Gagal mengambil data tagihan");
-                }
-            });
-        }
-
 
         $('#confirmation').click(function() {
             let id = $(this).attr('data-id');
