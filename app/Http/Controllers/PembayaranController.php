@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use Midtrans\Snap;
 use Midtrans\Config;
+use Midtrans\Notification;
 use App\Models\Tagihan;
 use App\Models\WajibPajak;
-use Midtrans\Notification;
 
 class PembayaranController extends Controller
 {
@@ -84,7 +84,7 @@ class PembayaranController extends Controller
             }
 
 
-            if ($transactionStatus == 'settlement') {
+            if ($transactionStatus == 'capture') {
                 $tagihan->status_bayar = 'dikonfirmasi';
                 $tagihan->save();
 

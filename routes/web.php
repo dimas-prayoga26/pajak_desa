@@ -7,8 +7,12 @@ use App\Http\Controllers\TagihanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\WajibPajakController;
+use App\Http\Middleware\VerifyCsrfToken;
 
 Route::redirect('', '/auth/login');
+
+Route::post('pajak-tagihan/bayar/{id}', [PembayaranController::class, 'snapToken']);
+Route::post('pajak-tagihan/bayar/callback', [PembayaranController::class, 'notificationHandler']);
 
 Route::group(["middleware" => ["guest"]], function() {
     Route::prefix("auth")->group(function() {
@@ -16,9 +20,6 @@ Route::group(["middleware" => ["guest"]], function() {
         Route::post('/login', [LoginController::class, 'login'])->name('login.post');
     });
 });
-
-Route::get('pajak-tagihan/bayar/{id}', [PembayaranController::class, 'snapToken']);
-Route::post('pajak-tagihan/midtrans/callback', [PembayaranController::class, 'notificationHandler']);
 
 Route::middleware(['web', 'auth'])->group(function () {
 
@@ -30,8 +31,6 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/dashboard/search-nop', [DashboardController::class, 'searchNop'])->name('dashboard.search.nop');
         Route::post('dashboard/update-user-nop', [DashboardController::class, 'updateUser'])->middleware('auth')->name('dashboard.update-user');
-
-
 
         Route::get("/detail-pajak/datatable", [WajibPajakController::class, "datatable"])->name("detail-pajak.datatable");
         Route::get('/detail-pajak/tagihan/{id}', [WajibPajakController::class, 'getByWajibPajak'])->name("detail-pajak.getByWajibPajak");
