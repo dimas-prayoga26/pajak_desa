@@ -12,6 +12,7 @@ use App\Http\Middleware\VerifyCsrfToken;
 Route::redirect('', '/auth/login');
 
 Route::post('pajak-tagihan/bayar/callback', [PembayaranController::class, 'notificationHandler']);
+Route::get('pajak-tagihan/bayar/finish', [PembayaranController::class, 'finishRedirect']);
 Route::post('pajak-tagihan/bayar/{id}', [PembayaranController::class, 'snapToken']);
 
 Route::group(["middleware" => ["guest"]], function() {

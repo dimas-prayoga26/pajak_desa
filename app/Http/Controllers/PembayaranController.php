@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Midtrans\Snap;
 use Midtrans\Config;
 use App\Models\Tagihan;
+use Midtrans\Transaction;
 use App\Models\WajibPajak;
 use Midtrans\Notification;
 use Illuminate\Http\Request;
@@ -184,6 +185,11 @@ class PembayaranController extends Controller
             Log::error('Error processing notification: ' . $e->getMessage());
             return response()->json(['message' => 'Failed to process notification'], 500);
         }
+    }
+
+    public function finishRedirect(Request $request)
+    {
+        Log::info('Semua request:', $request->all());
     }
 
 }
