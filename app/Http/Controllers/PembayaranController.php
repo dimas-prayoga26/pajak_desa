@@ -13,15 +13,25 @@ class PembayaranController extends Controller
     public function snapToken($id)
     {
         try {
+            Log::info('Memulai proses pembuatan Snap Token untuk tagihan ID:', ['tagihan_id' => $id]);
+
             $tagihan = Tagihan::findOrFail($id);
             $user = auth()->user();
 
+
             if ($tagihan->jumlah < 1000) {
+                Log::warning('Jumlah tagihan terlalu kecil untuk diproses:', ['tagihan_id' => $id, 'jumlah' => $tagihan->jumlah]);
                 return response()->json([
                     'status' => false,
                     'message' => 'Jumlah tagihan terlalu kecil untuk diproses.'
                 ]);
             }
+
+
+            Log::info('Menyiapkan konfigurasi Midtrans', [
+                'server_key' => env('MIDTRANS_SERVER_KEY'),
+                'isProduction' => Config::$isProduction
+            ]);
 
 
             Config::$serverKey = env('MIDTRANS_SERVER_KEY');
@@ -34,6 +44,7 @@ class PembayaranController extends Controller
             $tagihan->order_id = $orderId;
             $tagihan->save();
 
+
             $params = [
                 'transaction_details' => [
                     'order_id' => $orderId,
@@ -45,7 +56,14 @@ class PembayaranController extends Controller
                 ]
             ];
 
+
+            Log::info('Menyusun parameter untuk Snap Token:', ['params' => $params]);
+
+
             $snapToken = Snap::getSnapToken($params);
+
+
+            Log::info('Snap Token berhasil dibuat:', ['snap_token' => $snapToken]);
 
             return response()->json([
                 'status' => true,
@@ -53,6 +71,12 @@ class PembayaranController extends Controller
             ]);
 
         } catch (\Exception $e) {
+
+            Log::error('Gagal membuat Snap Token:', [
+                'error' => $e->getMessage(),
+                'tagihan_id' => $id
+            ]);
+
             return response()->json([
                 'status' => false,
                 'message' => 'Gagal membuat Snap Token: ' . $e->getMessage()
