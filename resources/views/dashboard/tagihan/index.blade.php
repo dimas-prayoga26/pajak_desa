@@ -448,7 +448,10 @@
 
             $.ajax({
                 url: url,
-                type: 'GET',
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
                 success: function (response) {
                     if (response.snap_token) {
                         snap.pay(response.snap_token, {
