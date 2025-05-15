@@ -191,25 +191,27 @@
 
     <script>
 
-        const transactionStatus = @json($transactionStatus ?? '');
-        const orderId = @json($orderId ?? '');
+        document.addEventListener('DOMContentLoaded', function () {
+            const transactionStatus = @json($transactionStatus ?? '');
+            const orderId = @json($orderId ?? '');
 
-        if (!transactionStatus) return;
+            if (!transactionStatus) return;
 
-        if (transactionStatus === 'settlement' || transactionStatus === 'capture') {
-            Swal.fire({
-                icon: 'success',
-                title: 'Pembayaran Berhasil',
-                text: `Order ID: ${orderId}`,
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Status Pembayaran',
-                text: `Status: ${transactionStatus}`,
-            });
-        }
-        
+            if (transactionStatus === 'settlement' || transactionStatus === 'capture') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Pembayaran Berhasil',
+                    text: `Order ID: ${orderId}`,
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Status Pembayaran',
+                    text: `Status: ${transactionStatus}`,
+                });
+            }
+        });
+
         $('.select2').select2();
 
         $('#selectNop').select2({
