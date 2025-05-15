@@ -251,6 +251,8 @@ class TagihanController extends Controller
         $search = $request->input('q');
         $user = Auth::user();
 
+        // dd($request);
+
         $query = WajibPajak::query();
 
         if ($user->hasRole('warga')) {
@@ -265,7 +267,7 @@ class TagihanController extends Controller
 
 
         $formatted = $data->map(function ($item) use ($user) {
-            if ($user->hasRole('admin')) {
+            if ($user->hasRole('superAdmin')) {
 
                 return [
                     'id' => $item->id,
@@ -279,8 +281,6 @@ class TagihanController extends Controller
                 ];
             }
         });
-
-        // dd($formatted);
 
         return response()->json($formatted);
     }
