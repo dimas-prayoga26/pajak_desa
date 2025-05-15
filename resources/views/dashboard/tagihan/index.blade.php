@@ -265,7 +265,7 @@
                 {
                     targets: 4,
                     render: function (data, type, full, meta) {
-                        if (data === 'dibayar') {
+                        if (data == 'dibayar' || data == 'dikonfirmasi') {
                             return '<span class="badge badge-success">Sudah Dibayar</span>';
                         } else if (data === 'belum') {
                             return '<span class="badge badge-warning">Belum Dibayar</span>';
