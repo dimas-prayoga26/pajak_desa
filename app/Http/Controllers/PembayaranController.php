@@ -189,7 +189,13 @@ class PembayaranController extends Controller
 
     public function finishRedirect(Request $request)
     {
-        Log::info('Semua request:', $request->all());
+        Log::info('Finish Redirect dipanggil:', $request->all());
+
+        $orderId = $request->query('order_id');
+        $transactionStatus = $request->query('transaction_status');
+
+        return view('dashboard.tagihan.index', compact('orderId', 'transactionStatus'));
     }
+
 
 }

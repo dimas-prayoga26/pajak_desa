@@ -191,6 +191,25 @@
 
     <script>
 
+        const transactionStatus = @json($transactionStatus ?? '');
+        const orderId = @json($orderId ?? '');
+
+        if (!transactionStatus) return;
+
+        if (transactionStatus === 'settlement' || transactionStatus === 'capture') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Pembayaran Berhasil',
+                text: `Order ID: ${orderId}`,
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Status Pembayaran',
+                text: `Status: ${transactionStatus}`,
+            });
+        }
+        
         $('.select2').select2();
 
         $('#selectNop').select2({
@@ -456,13 +475,13 @@
                     if (response.snap_token) {
                         snap.pay(response.snap_token, {
                             onSuccess: function (result) {
-                                console.log('Pembayaran berhasil:', result);
-                                toastr.success('Pembayaran berhasil.');
+                                // console.log('Pembayaran berhasil:', result);
+                                // toastr.success('Pembayaran berhasil.');
                                 $('#datatable').DataTable().ajax.reload();
                             },
                             onPending: function (result) {
-                                console.log('Menunggu pembayaran:', result);
-                                toastr.info('Menunggu penyelesaian pembayaran.');
+                                // console.log('Menunggu pembayaran:', result);
+                                // toastr.info('Menunggu penyelesaian pembayaran.');
                                 $('#datatable').DataTable().ajax.reload();
                             },
                             onError: function (result) {

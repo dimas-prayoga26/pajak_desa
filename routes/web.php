@@ -12,7 +12,6 @@ use App\Http\Middleware\VerifyCsrfToken;
 Route::redirect('', '/auth/login');
 
 Route::post('pajak-tagihan/bayar/callback', [PembayaranController::class, 'notificationHandler']);
-Route::get('pajak-tagihan/bayar/finish', [PembayaranController::class, 'finishRedirect']);
 Route::post('pajak-tagihan/bayar/{id}', [PembayaranController::class, 'snapToken']);
 
 Route::group(["middleware" => ["guest"]], function() {
@@ -43,6 +42,8 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::get("/detail-tagihan/datatable", [TagihanController::class, "datatable"])->name("detail-tagihan.datatable");
         Route::get('/detail-tagihan/nop-options', [TagihanController::class, 'getNopOptions'])->name('detail-pajak.nop-options');
         Route::resource("detail-tagihan", TagihanController::class);
+
+        Route::get('pajak-tagihan/bayar/finish', [PembayaranController::class, 'finishRedirect']);
 
         Route::get("/user/datatable", [UserController::class, "datatable"])->name("user.datatable");
         Route::resource("user", UserController::class);
