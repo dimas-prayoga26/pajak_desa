@@ -54,6 +54,8 @@ class PembayaranController extends Controller
                         'country_code' => 'IDN',
                     ],
                     'shipping_address' => [
+                        'first_name' => $user->biodata->nama ?? $user->name ?? 'User',
+                        'phone' => $user->biodata->no_hp ?? '',
                         'address' => $user->biodata->alamat ?? '',
                         'city' => '',
                         'postal_code' => '',
