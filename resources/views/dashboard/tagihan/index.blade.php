@@ -623,7 +623,7 @@
                         toastr.success(response.message, 'Berhasil');
                         $("#formTagihan")[0].reset();
                         $('#modalTambahTagihan').modal('hide');
-                        $('#datatable').DataTable().ajax.reload();
+                        table.ajax.reload(null, false);
                     } else {
                         toastr.warning(response.message || 'Data tidak berhasil diproses.', 'Peringatan');
                     }
