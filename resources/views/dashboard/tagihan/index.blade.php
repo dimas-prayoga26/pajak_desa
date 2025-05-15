@@ -348,7 +348,7 @@
                 {
                     targets: 3,
                     render: function (data, type, full, meta) {
-                        if (data === 'dibayar') {
+                        if (data == 'dibayar' || data == 'dikonfirmasi') {
                             return '<span class="badge badge-success">Sudah Dibayar</span>';
                         } else if (data === 'belum') {
                             return '<span class="badge badge-warning">Belum Dibayar</span>';
@@ -373,13 +373,13 @@
 
                             case 'dibayar':
                                 tombol = `
-                                    <span class="badge badge-warning">Sedang direview oleh admin</span>
+                                    <span class="badge badge-success">Pembayaran Sudah Dikonfirmasi</span>
                                 `;
                                 break;
 
                             case 'dikonfirmasi':
                                 tombol = `
-                                    <span class="badge badge-success">Pembayaran Dikonfirmasi Admin</span>
+                                    <span class="badge badge-success">Pembayaran Sudah Dikonfirmasi</span>
                                 `;
                                 break;
 
