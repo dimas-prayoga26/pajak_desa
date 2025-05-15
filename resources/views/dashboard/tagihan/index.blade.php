@@ -94,51 +94,49 @@
 
     <div class="modal fade" id="modalTambahTagihan" tabindex="-1" role="dialog" aria-labelledby="modalLabelTagihan" aria-hidden="true">
         <div class="modal-dialog" role="document">
-            <form id="formTambahTagihan">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalLabelTagihan">Tambah Tagihan</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
-                            <span aria-hidden="true">&times;</span>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabelTagihan">Tambah Tagihan</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="formTagihan">
+                    <div class="modal-body">
+
+                        <div class="form-group">
+                            <label for="nop" class="form-label">Nop</label>
+                            <select class="form-control" name="nop" id="nop">
+                                <option value="">Cari NOP</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tahun">Tahun</label>
+                            <input type="number" class="form-control" name="tahun" id="tahun" placeholder="Contoh: 2025">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="jumlah">Jumlah Tagihan (Rp)</label>
+                            <input type="text" class="form-control" name="jumlah" id="jumlah" placeholder="Contoh: 500000">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="jatuh_tempo">Jatuh Tempo</label>
+                            <input type="date" class="form-control" name="jatuh_tempo" id="jatuh_tempo">
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="reset" class="btn btn-danger btn-sm">Reset</button>
+                        <button type="button" class="btn btn-primary btn-sm" id="simpanData">
+                            <i class="fe fe-save"></i> Simpan
                         </button>
                     </div>
-                    <form id="formTagihan">
-                        <div class="modal-body">
-
-                            <div class="form-group">
-                                <label for="nop" class="form-label">Nop</label>
-                                <select class="form-control" name="nop" id="nop">
-                                    <option value="">Cari NOP</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="tahun">Tahun</label>
-                                <input type="number" class="form-control" name="tahun" id="tahun" placeholder="Contoh: 2025">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="jumlah">Jumlah Tagihan (Rp)</label>
-                                <input type="text" class="form-control" name="jumlah" id="jumlah" placeholder="Contoh: 500000">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="jatuh_tempo">Jatuh Tempo</label>
-                                <input type="date" class="form-control" name="jatuh_tempo" id="jatuh_tempo">
-                            </div>
-                        </div>
-
-                        <div class="modal-footer">
-                            <button type="reset" class="btn btn-danger btn-sm">Reset</button>
-                            <button type="button" class="btn btn-primary btn-sm" id="simpanData">
-                                <i class="fe fe-save"></i> Simpan
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
-        </div>
+    </div>
 
 
     <div class="modal fade" id="modalEditData" tabindex="-1" aria-labelledby="modalEditDataLabel" aria-hidden="true">
@@ -215,32 +213,7 @@
             }
         });
 
-        $('#modalTambahTagihan').on('shown.bs.modal', function () {
-            $('#nop').select2({
-                placeholder: 'Cari NOP...',
-                allowClear: true,
-                width: '100%',
-                dropdownParent: $('#modalTambahTagihan'),
-                ajax: {
-                    url: "{{ route('detail-pajak.nop-options') }}",
-                    dataType: 'json',
-                    delay: 250,
-                    data: function (params) {
-                        return {
-                            q: params.term
-                        };
-                    },
-                    processResults: function (data) {
-                        return {
-                            results: data
-                        };
-                    },
-                    cache: true
-                }
-            });
-        });
-
-        var table;
+        let table;
 
         let debounceTimer;
         let columns;
@@ -395,6 +368,30 @@
         }
 
         $(document).ready(function () {
+
+            $('#nop').select2({
+                placeholder: 'Cari NOP...',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: $('#modalTambahTagihan'),
+                ajax: {
+                    url: "{{ route('detail-pajak.nop-options') }}",
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            q: params.term
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                    cache: true
+                }
+            });
+
             table = $("#datatable").DataTable({
                 responsive: true,
                 processing: true,
@@ -442,6 +439,11 @@
             });
         });
 
+        $('#modalTambahTagihan').on('shown.bs.modal', function () {
+            $('#nop').val(null).trigger('change');
+            $("#formTagihan")[0].reset();
+        });
+
         function bayarTagihan(tagihanId) {
 
             const url = "{{ url('pajak-tagihan/bayar') }}/" + tagihanId;
@@ -456,12 +458,12 @@
                     if (response.snap_token) {
                         snap.pay(response.snap_token, {
                             onSuccess: function (result) {
-                                // console.log('Pembayaran berhasil:', result);
+
                                 toastr.success('Pembayaran berhasil.');
                                 $('#datatable').DataTable().ajax.reload();
                             },
                             onPending: function (result) {
-                                // console.log('Menunggu pembayaran:', result);
+
                                 toastr.info('Menunggu penyelesaian pembayaran.');
                                 $('#datatable').DataTable().ajax.reload();
                             },
@@ -621,6 +623,7 @@
                 success: function (response) {
                     if (response.status === true) {
                         toastr.success(response.message, 'Berhasil');
+
                         $("#formTagihan")[0].reset();
                         $('#modalTambahTagihan').modal('hide');
                         table.ajax.reload(null, false);
@@ -634,10 +637,6 @@
                 }
             });
         });
-
-
-
-
 
     </script>
 @endsection
