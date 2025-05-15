@@ -14,4 +14,9 @@ class Tagihan extends Model
     {
         return $this->belongsTo(WajibPajak::class);
     }
+
+    public function midtransTransactions()
+    {
+        return $this->hasMany(MidtransTransaction::class);
+    }
 }

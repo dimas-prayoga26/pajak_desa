@@ -16,7 +16,6 @@ class PembayaranController extends Controller
             $tagihan = Tagihan::findOrFail($id);
             $user = auth()->user();
 
-
             if ($tagihan->jumlah < 1000) {
                 return response()->json([
                     'status' => false,
@@ -25,15 +24,19 @@ class PembayaranController extends Controller
             }
 
 
-            Config::$serverKey = 'SB-Mid-server-I9AT2p8HQZS_1DMsvcFIPoxW';
+            Config::$serverKey = env('MIDTRANS_SERVER_KEY');
             Config::$isProduction = false;
             Config::$isSanitized = true;
             Config::$is3ds = true;
 
 
+            $orderId = 'TAGIHAN-' . $tagihan->id . '-' . time();
+            $tagihan->order_id = $orderId;
+            $tagihan->save();
+
             $params = [
                 'transaction_details' => [
-                    'order_id' => 'TAGIHAN-' . $tagihan->id . '-' . time(),
+                    'order_id' => $orderId,
                     'gross_amount' => (int) $tagihan->jumlah,
                 ],
                 'customer_details' => [
@@ -57,10 +60,10 @@ class PembayaranController extends Controller
         }
     }
 
-     public function notificationHandler(Request $request)
+
+    public function notificationHandler(Request $request)
     {
         try {
-
             Log::info('Midtrans notification received:', $request->all());
 
 
@@ -69,21 +72,22 @@ class PembayaranController extends Controller
             $grossAmount = $request->input('gross_amount');
             $signatureKey = $request->input('signature_key');
             $transactionStatus = $request->input('transaction_status');
+            $paymentType = $request->input('payment_type');
+            $fraudStatus = $request->input('fraud_status');
 
 
             Log::info('Extracted data from notification:', [
                 'order_id' => $orderId,
                 'status_code' => $statusCode,
                 'gross_amount' => $grossAmount,
-                'transaction_status' => $transactionStatus
+                'transaction_status' => $transactionStatus,
+                'payment_type' => $paymentType,
+                'fraud_status' => $fraudStatus
             ]);
 
 
             $serverKey = env('MIDTRANS_SERVER_KEY');
-
-
             $expectedSignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
-
 
             if ($signatureKey !== $expectedSignature) {
                 Log::warning('Invalid signature for order:', ['order_id' => $orderId]);
@@ -99,44 +103,47 @@ class PembayaranController extends Controller
             }
 
 
+            $midtransTransaction = new MidtransTransaction();
+            $midtransTransaction->tagihan_id = $tagihan->id;
+            $midtransTransaction->order_id = $orderId;
+            $midtransTransaction->transaction_status = $transactionStatus;
+            $midtransTransaction->gross_amount = $grossAmount;
+            $midtransTransaction->payment_type = $paymentType;
+            $midtransTransaction->fraud_status = $fraudStatus;
+            $midtransTransaction->save();
+
+
             $tagihan->status_bayar = 'dikonfirmasi';
             $tagihan->save();
 
 
             $wajibPajakId = $tagihan->wajib_pajak_id;
-
-
             $totalTagihan = Tagihan::where('wajib_pajak_id', $wajibPajakId)->count();
             $tagihanLunas = Tagihan::where('wajib_pajak_id', $wajibPajakId)
                 ->where('status_bayar', 'dikonfirmasi')
                 ->count();
-
 
             Log::info('Total tagihan and tagihan lunas:', [
                 'total_tagihan' => $totalTagihan,
                 'tagihan_lunas' => $tagihanLunas
             ]);
 
-
             if ($totalTagihan > 0 && $totalTagihan == $tagihanLunas) {
-
                 WajibPajak::where('id', $wajibPajakId)
                     ->update(['status_bayar' => 'dibayar']);
                 Log::info('Wajib pajak status updated to "dibayar".', ['wajib_pajak_id' => $wajibPajakId]);
             } else {
-
                 WajibPajak::where('id', $wajibPajakId)
                     ->update(['status_bayar' => 'belum']);
                 Log::info('Wajib pajak status updated to "belum".', ['wajib_pajak_id' => $wajibPajakId]);
             }
 
-
             return response()->json(['message' => 'Notification processed successfully'], 200);
 
         } catch (\Exception $e) {
-
             Log::error('Error processing notification: ' . $e->getMessage());
             return response()->json(['message' => 'Failed to process notification'], 500);
         }
     }
+
 }
