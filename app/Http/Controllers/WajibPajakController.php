@@ -190,6 +190,8 @@ class WajibPajakController extends Controller
                 ], 404);
             }
 
+            Tagihan::where('wajib_pajak_id', $detailPajak)->delete();
+            
             $detailPajak->delete();
 
             DB::commit();
