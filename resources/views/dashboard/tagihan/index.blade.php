@@ -549,7 +549,7 @@
                         success: function(response) {
                             if (response.status === true) {
                                 toastr.success(response.message, 'Berhasil');
-                                table.ajax.reload();
+                                $('#datatable').DataTable().ajax.reload();
                             } else {
                                 toastr.warning('Data tidak ditemukan.', 'Gagal');
                             }
@@ -586,7 +586,7 @@
                     toastr.success(response.message || 'Tagihan berhasil diperbarui');
                     $('#modalEditData').modal('hide');
                     $('#editData')[0].reset();
-                    table.ajax.reload();
+                    $('#datatable').DataTable().ajax.reload();
                 },
                 error: function(xhr) {
                     let msg = xhr.responseJSON?.message || 'Terjadi kesalahan';
@@ -623,7 +623,7 @@
                         toastr.success(response.message, 'Berhasil');
                         $("#formTagihan")[0].reset();
                         $('#modalTambahTagihan').modal('hide');
-                        table.ajax.reload();
+                        $('#datatable').DataTable().ajax.reload();
                     } else {
                         toastr.warning(response.message || 'Data tidak berhasil diproses.', 'Peringatan');
                     }
