@@ -42,9 +42,6 @@ class PembayaranController extends Controller
                 ]
             ];
 
-
-
-
             $snapToken = Snap::getSnapToken($params);
 
             return response()->json([
@@ -60,58 +57,86 @@ class PembayaranController extends Controller
         }
     }
 
-    public function notificationHandler(Request $request)
+     public function notificationHandler(Request $request)
     {
         try {
 
-            $notif = new Notification();
-
-            $transactionStatus = $notif->transaction_status;
-            $orderId = $notif->order_id;
+            Log::info('Midtrans notification received:', $request->all());
 
 
-            preg_match('/TAGIHAN\-(\d+)\-/', $orderId, $match);
-            $tagihanId = $match[1] ?? null;
+            $orderId = $request->input('order_id');
+            $statusCode = $request->input('status_code');
+            $grossAmount = $request->input('gross_amount');
+            $signatureKey = $request->input('signature_key');
+            $transactionStatus = $request->input('transaction_status');
 
-            if (!$tagihanId) {
-                return response()->json(['message' => 'Tagihan tidak dikenali'], 400);
+
+            Log::info('Extracted data from notification:', [
+                'order_id' => $orderId,
+                'status_code' => $statusCode,
+                'gross_amount' => $grossAmount,
+                'transaction_status' => $transactionStatus
+            ]);
+
+
+            $serverKey = env('MIDTRANS_SERVER_KEY');
+
+
+            $expectedSignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+
+
+            if ($signatureKey !== $expectedSignature) {
+                Log::warning('Invalid signature for order:', ['order_id' => $orderId]);
+                return response()->json(['message' => 'Invalid signature'], 403);
             }
 
-            $tagihan = Tagihan::find($tagihanId);
+
+            $tagihan = Tagihan::where('order_id', $orderId)->first();
 
             if (!$tagihan) {
-                return response()->json(['message' => 'Tagihan tidak ditemukan'], 404);
+                Log::warning('Tagihan not found for order:', ['order_id' => $orderId]);
+                return response()->json(['message' => 'Tagihan not found'], 404);
             }
 
 
-            if ($transactionStatus == 'capture') {
-                $tagihan->status_bayar = 'dikonfirmasi';
-                $tagihan->save();
+            $tagihan->status_bayar = 'dikonfirmasi';
+            $tagihan->save();
 
 
-                $wajibPajakId = $tagihan->wajib_pajak_id;
-
-                $totalTagihan = Tagihan::where('wajib_pajak_id', $wajibPajakId)->count();
-                $tagihanLunas = Tagihan::where('wajib_pajak_id', $wajibPajakId)
-                    ->where('status_bayar', 'dikonfirmasi')
-                    ->count();
+            $wajibPajakId = $tagihan->wajib_pajak_id;
 
 
-                if ($totalTagihan > 0 && $totalTagihan == $tagihanLunas) {
-                    WajibPajak::where('id', $wajibPajakId)
-                        ->update(['status_bayar' => 'dibayar']);
-                } else {
+            $totalTagihan = Tagihan::where('wajib_pajak_id', $wajibPajakId)->count();
+            $tagihanLunas = Tagihan::where('wajib_pajak_id', $wajibPajakId)
+                ->where('status_bayar', 'dikonfirmasi')
+                ->count();
 
-                    WajibPajak::where('id', $wajibPajakId)
-                        ->update(['status_bayar' => 'belum']);
-                }
+
+            Log::info('Total tagihan and tagihan lunas:', [
+                'total_tagihan' => $totalTagihan,
+                'tagihan_lunas' => $tagihanLunas
+            ]);
+
+
+            if ($totalTagihan > 0 && $totalTagihan == $tagihanLunas) {
+
+                WajibPajak::where('id', $wajibPajakId)
+                    ->update(['status_bayar' => 'dibayar']);
+                Log::info('Wajib pajak status updated to "dibayar".', ['wajib_pajak_id' => $wajibPajakId]);
+            } else {
+
+                WajibPajak::where('id', $wajibPajakId)
+                    ->update(['status_bayar' => 'belum']);
+                Log::info('Wajib pajak status updated to "belum".', ['wajib_pajak_id' => $wajibPajakId]);
             }
 
-            return response()->json(['message' => 'Notifikasi diproses'], 200);
+
+            return response()->json(['message' => 'Notification processed successfully'], 200);
 
         } catch (\Exception $e) {
-            Log::error('Midtrans Notification Error: ' . $e->getMessage());
-            return response()->json(['message' => 'Gagal memproses notifikasi'], 500);
+
+            Log::error('Error processing notification: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to process notification'], 500);
         }
     }
 }
