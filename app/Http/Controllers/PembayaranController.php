@@ -51,7 +51,7 @@ class PembayaranController extends Controller
                         'address' => $user->biodata->alamat ?? '',
                         'city' => '',
                         'postal_code' => '',
-                        'country_code' => 'ID',
+                        'country_code' => 'IDN',
                     ],
                     'shipping_address' => [
                         'address' => $user->biodata->alamat ?? '',
