@@ -17,33 +17,15 @@ class PembayaranController extends Controller
     public function snapToken($id)
     {
         try {
-            Log::info('Memulai proses pembuatan Snap Token untuk tagihan ID:', ['tagihan_id' => $id]);
-
             $tagihan = Tagihan::findOrFail($id);
-
-            // Validasi jika tagihan tidak ditemukan
-            if (!$tagihan) {
-                Log::warning('Tagihan tidak ditemukan untuk ID:', ['tagihan_id' => $id]);
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Tagihan tidak ditemukan.'
-                ], 404);
-            }
-
             $user = auth()->user();
 
             if ($tagihan->jumlah < 1000) {
-                Log::warning('Jumlah tagihan terlalu kecil untuk diproses:', ['tagihan_id' => $id, 'jumlah' => $tagihan->jumlah]);
                 return response()->json([
                     'status' => false,
                     'message' => 'Jumlah tagihan terlalu kecil untuk diproses.'
                 ]);
             }
-
-            Log::info('Menyiapkan konfigurasi Midtrans', [
-                'server_key' => env('MIDTRANS_SERVER_KEY'),
-                'isProduction' => Config::$isProduction
-            ]);
 
             Config::$serverKey = env('MIDTRANS_SERVER_KEY');
             Config::$isProduction = false;
@@ -54,6 +36,8 @@ class PembayaranController extends Controller
             $tagihan->order_id = $orderId;
             $tagihan->save();
 
+            $wajibPajak = WajibPajak::find($tagihan->wajib_pajak_id);
+
             $params = [
                 'transaction_details' => [
                     'order_id' => $orderId,
@@ -62,25 +46,32 @@ class PembayaranController extends Controller
                 'customer_details' => [
                     'first_name' => $user->biodata->nama ?? $user->name ?? 'User',
                     'email' => $user->email ?? 'user@example.com',
+                    'phone' => $user->biodata->no_hp ?? '',
+                    'billing_address' => [
+                        'address' => $user->biodata->alamat ?? '',
+                        'city' => '',
+                        'postal_code' => '',
+                        'country_code' => 'ID',
+                    ],
+                    'shipping_address' => [
+                        'address' => $user->biodata->alamat ?? '',
+                        'city' => '',
+                        'postal_code' => '',
+                        'country_code' => 'ID',
+                    ],
+                ],
+                'item_details' => [
+                    [
+                        'id' => (string)$wajibPajak->id,
+                        'price' => (int)$tagihan->jumlah,
+                        'quantity' => 1,
+                        'name' => $wajibPajak->nop,
+                        'subtotal' => (int)$tagihan->jumlah,
+                    ]
                 ]
             ];
 
-            Log::info('Menyusun parameter untuk Snap Token:', ['params' => $params]);
-
-            // Mencoba mendapatkan Snap Token dari Midtrans
-            try {
-                $snapToken = Snap::getSnapToken($params);
-                Log::info('Snap Token berhasil dibuat:', ['snap_token' => $snapToken]);
-            } catch (\Exception $e) {
-                Log::error('Gagal mendapatkan Snap Token dari Midtrans:', [
-                    'error' => $e->getMessage(),
-                    'params' => $params
-                ]);
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Gagal membuat Snap Token dari Midtrans: ' . $e->getMessage()
-                ]);
-            }
+            $snapToken = Snap::getSnapToken($params);
 
             return response()->json([
                 'status' => true,
@@ -88,18 +79,12 @@ class PembayaranController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Gagal membuat Snap Token:', [
-                'error' => $e->getMessage(),
-                'tagihan_id' => $id
-            ]);
-
             return response()->json([
                 'status' => false,
                 'message' => 'Gagal membuat Snap Token: ' . $e->getMessage()
             ]);
         }
     }
-
 
 
     public function notificationHandler(Request $request)
