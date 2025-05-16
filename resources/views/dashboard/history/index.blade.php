@@ -130,7 +130,7 @@
                 serverSide: true,
                 autoWidth: false,
                 ajax: {
-                    url: "{{ route('detail-tagihan.datatable') }}",
+                    url: "{{ route('riwayat-pajak.datatable') }}",
                     data: function (d) {
                         d.daterange = $('#daterange').val();
                     }

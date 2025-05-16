@@ -194,55 +194,55 @@ class TagihanController extends Controller
 
 
     public function datatable(Request $request)
-{
-    $user = auth()->user();
-    $nop = $request->nop; // ambil NOP dari request
+    {
+        $user = auth()->user();
+        $nop = $request->nop;
 
-    if ($user->hasRole('superAdmin')) {
-        if (strlen($nop) !== 18) {
-            return datatables()->of([])->make(true);
+        if ($user->hasRole('superAdmin')) {
+            if (strlen($nop) !== 18) {
+                return datatables()->of([])->make(true);
+            }
+
+            $exists = WajibPajak::where('nop', 'like', '%' . $nop . '%')->exists();
+
+            if (!$exists) {
+                $data = datatables()->of([])->make(true)->getData(true);
+                return response()->json(array_merge($data, [
+                    'status' => false,
+                    'type' => 'error',
+                    'message' => 'NOP tidak ditemukan.'
+                ]));
+            }
+
+            $query = Tagihan::with('wajibPajak.user.biodata')
+                ->whereHas('wajibPajak', function ($q) use ($nop) {
+                    $q->where('nop', 'like', '%' . $nop . '%');
+                });
+
+            return datatables()->of($query)
+                ->addIndexColumn()
+                ->make(true);
         }
 
-        $exists = WajibPajak::where('nop', 'like', '%' . $nop . '%')->exists();
+        // ✅ Perbaiki bagian warga → pakai juga NOP untuk filter
+        if ($user->hasRole('warga')) {
+            // dd($nop);
+            if (!$nop) {
+                return datatables()->of([])->make(true); // kalau belum pilih NOP
+            }
 
-        if (!$exists) {
-            $data = datatables()->of([])->make(true)->getData(true);
-            return response()->json(array_merge($data, [
-                'status' => false,
-                'type' => 'error',
-                'message' => 'NOP tidak ditemukan.'
-            ]));
+            $query = Tagihan::with('wajibPajak.user.biodata')
+                ->whereHas('wajibPajak', function ($q) use ($user, $nop) {
+                    $q->where('user_id', $user->id)
+                    ->where('nop', 'like', '%' . $nop . '%'); // filter berdasarkan NOP juga
+                });
+
+            return datatables()->of($query)
+                ->addIndexColumn()
+                ->make(true);
         }
 
-        $query = Tagihan::with('wajibPajak.user.biodata')
-            ->whereHas('wajibPajak', function ($q) use ($nop) {
-                $q->where('nop', 'like', '%' . $nop . '%');
-            });
-
-        return datatables()->of($query)
-            ->addIndexColumn()
-            ->make(true);
-    }
-
-    // ✅ Perbaiki bagian warga → pakai juga NOP untuk filter
-    if ($user->hasRole('warga')) {
-        // dd($nop);
-        if (!$nop) {
-            return datatables()->of([])->make(true); // kalau belum pilih NOP
-        }
-
-        $query = Tagihan::with('wajibPajak.user.biodata')
-            ->whereHas('wajibPajak', function ($q) use ($user, $nop) {
-                $q->where('user_id', $user->id)
-                  ->where('nop', 'like', '%' . $nop . '%'); // filter berdasarkan NOP juga
-            });
-
-        return datatables()->of($query)
-            ->addIndexColumn()
-            ->make(true);
-    }
-
-    return datatables()->of([])->make(true);
+        return datatables()->of([])->make(true);
 }
 
 

@@ -45,6 +45,18 @@
           </li>
 
           @role('superAdmin')
+            <!-- Data Pajak -->
+            <li class="nav-item">
+                <a href="{{ route('riwayat-pajak.index') }}" 
+                    class="nav-link {{ Request::is('super-admin/riwayat-pajak') ? 'active' : '' }}">
+                    <i class="nav-icon fi-rr-time-past"></i>
+                    <p>Data History Pembayaran</p>
+                </a>
+            </li>
+
+          @endrole
+
+          @role('superAdmin')
           <!-- Data User -->
           <li class="nav-item">
               <a href="{{ route('user.index') }}" 
@@ -53,18 +65,6 @@
                   <p>Data User</p>
               </a>
           </li>
-          @endrole
-
-          @role('superAdmin')
-            <!-- Data Pajak -->
-            <li class="nav-item">
-                <a href="{{ route('history-tagihan.index') }}" 
-                    class="nav-link {{ Request::is('super-admin/history-tagihan') ? 'active' : '' }}">
-                    <i class="nav-icon fi-rr-time-past"></i>
-                    <p>Data History Pembayaran</p>
-                </a>
-            </li>
-
           @endrole
     
             <!-- Logout -->

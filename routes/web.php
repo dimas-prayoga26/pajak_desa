@@ -46,9 +46,9 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::get('/detail-tagihan/nop-options', [TagihanController::class, 'getNopOptions'])->name('detail-tagihan.nop-options');
         Route::resource("detail-tagihan", TagihanController::class);
 
-        Route::get("/history-tagihan/datatable", [HistoryTagihanController::class, "datatable"])->name("detail-tagihan.datatable");
-        Route::get('/history-tagihan/nop-options', [HistoryTagihanController::class, 'getNopOptions'])->name('detail-pajak.nop-options');
-        Route::resource("history-tagihan", HistoryTagihanController::class);
+        Route::get("/riwayat-pajak/datatable", [HistoryTagihanController::class, "datatable"])->name("riwayat-pajak.datatable");
+        Route::get('/riwayat-pajak/nop-options', [HistoryTagihanController::class, 'getNopOptions'])->name('riwayat-pajak.nop-options');
+        Route::resource("riwayat-pajak", HistoryTagihanController::class);
 
         Route::get("/user/datatable", [UserController::class, "datatable"])->name("user.datatable");
         Route::resource("user", UserController::class);
