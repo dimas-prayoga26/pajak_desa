@@ -196,7 +196,7 @@
             allowClear: true,
             width: '100%',
             ajax: {
-                url: "{{ route('detail-pajak.nop-options') }}",
+                url: "{{ route('detail-tagihan.nop-options') }}",
                 dataType: 'json',
                 delay: 250,
                 data: function (params) {
@@ -375,7 +375,7 @@
                 width: '100%',
                 dropdownParent: $('#modalTambahTagihan'),
                 ajax: {
-                    url: "{{ route('detail-pajak.nop-options') }}",
+                    url: "{{ route('detail-tagihan.nop-options') }}",
                     dataType: 'json',
                     delay: 250,
                     data: function (params) {

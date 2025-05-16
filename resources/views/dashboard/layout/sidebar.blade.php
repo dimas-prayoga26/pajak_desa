@@ -54,6 +54,18 @@
               </a>
           </li>
           @endrole
+
+          @role('superAdmin')
+            <!-- Data Pajak -->
+            <li class="nav-item">
+                <a href="{{ route('history-tagihan.index') }}" 
+                    class="nav-link {{ Request::is('super-admin/history-tagihan') ? 'active' : '' }}">
+                    <i class="nav-icon fi-rr-time-past"></i>
+                    <p>Data History Pembayaran</p>
+                </a>
+            </li>
+
+          @endrole
     
             <!-- Logout -->
             <li class="nav-item mt-auto">

@@ -2,12 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use App\Http\Middleware\VerifyCsrfToken;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\TagihanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\WajibPajakController;
-use App\Http\Middleware\VerifyCsrfToken;
+use App\Http\Controllers\HistoryTagihanController;
 
 Route::redirect('', '/auth/login');
 
@@ -42,8 +43,12 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::resource("detail-pajak", WajibPajakController::class);
 
         Route::get("/detail-tagihan/datatable", [TagihanController::class, "datatable"])->name("detail-tagihan.datatable");
-        Route::get('/detail-tagihan/nop-options', [TagihanController::class, 'getNopOptions'])->name('detail-pajak.nop-options');
+        Route::get('/detail-tagihan/nop-options', [TagihanController::class, 'getNopOptions'])->name('detail-tagihan.nop-options');
         Route::resource("detail-tagihan", TagihanController::class);
+
+        Route::get("/history-tagihan/datatable", [HistoryTagihanController::class, "datatable"])->name("detail-tagihan.datatable");
+        Route::get('/history-tagihan/nop-options', [HistoryTagihanController::class, 'getNopOptions'])->name('detail-pajak.nop-options');
+        Route::resource("history-tagihan", HistoryTagihanController::class);
 
         Route::get("/user/datatable", [UserController::class, "datatable"])->name("user.datatable");
         Route::resource("user", UserController::class);
