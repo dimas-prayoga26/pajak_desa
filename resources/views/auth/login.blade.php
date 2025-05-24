@@ -22,8 +22,11 @@
   <!-- /.login-logo -->
   <div class="card card-outline card-primary">
     <div class="card-header text-center">
-      <a href="#" class="h1"><b>Admin</b>LTE</a>
+      <a href="#" class="h1">
+        <b>Sistem</b><br>pembayaran pajak
+      </a>
     </div>
+
     <div class="card-body">
       <p class="login-box-msg">Silakan Masukan </p>
 
@@ -54,12 +57,12 @@
         </div>
       </form>
 
-      <p class="mb-1 mt-3">
+      {{-- <p class="mb-1 mt-3">
         <a href="forgot-password.html">I forgot my password</a>
       </p>
       <p class="mb-0">
         <a href="register.html" class="text-center">Register a new membership</a>
-      </p>
+      </p> --}}
     </div>
     <!-- /.card-body -->
   </div>

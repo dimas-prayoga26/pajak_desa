@@ -55,7 +55,7 @@
               <div class="icon">
                 <i class="ion ion-person"></i>
               </div>
-              <a href="#" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
+              <a href="{{ route('user.index') }}" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
             </div>
           </div>
 
@@ -68,7 +68,7 @@
               <div class="icon">
                 <i class="ion ion-document-text"></i>
               </div>
-              <a href="#" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
+              <a href="{{ route('detail-pajak.index') }}" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
             </div>
           </div>
 
@@ -81,7 +81,7 @@
               <div class="icon">
                 <i class="ion ion-cash"></i>
               </div>
-              <a href="#" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
+              <a href="{{ route('riwayat-pajak.index') }}" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
             </div>
           </div>
 
@@ -94,7 +94,7 @@
               <div class="icon">
                 <i class="ion ion-stats-bars"></i>
               </div>
-              <a href="#" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
+              <a href="{{ route('riwayat-pajak.index') }}" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
             </div>
           </div>
       </div>
@@ -112,7 +112,7 @@
                   <div class="icon">
                       <i class="ion ion-home"></i>
                   </div>
-                  <a href="#" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
+                  <a href="{{ route('detail-tagihan.index') }}" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
               </div>
           </div>
 
@@ -125,7 +125,7 @@
                   <div class="icon">
                       <i class="ion ion-checkmark-circled"></i>
                   </div>
-                  <a href="#" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
+                  <a href="{{ route('riwayat-pajak.index') }}" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
               </div>
           </div>
 
@@ -138,7 +138,7 @@
                   <div class="icon">
                       <i class="ion ion-close-circled"></i>
                   </div>
-                  <a href="#" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
+                  <a href="{{ route('riwayat-pajak.index') }}" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
               </div>
           </div>
       </div>
