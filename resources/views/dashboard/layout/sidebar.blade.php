@@ -43,18 +43,14 @@
               <p>Data Tagihan</p>
             </a>
           </li>
-
-          @role('superAdmin')
             <!-- Data Pajak -->
-            <li class="nav-item">
-                <a href="{{ route('riwayat-pajak.index') }}" 
-                    class="nav-link {{ Request::is('super-admin/riwayat-pajak') ? 'active' : '' }}">
-                    <i class="nav-icon fi-rr-time-past"></i>
-                    <p>Data History Pembayaran</p>
-                </a>
-            </li>
-
-          @endrole
+          <li class="nav-item">
+              <a href="{{ route('riwayat-pajak.index') }}" 
+                  class="nav-link {{ Request::is('super-admin/riwayat-pajak') ? 'active' : '' }}">
+                  <i class="nav-icon fi-rr-time-past"></i>
+                  <p>Data History Pembayaran</p>
+              </a>
+          </li>
 
           @role('superAdmin')
           <!-- Data User -->

@@ -43,68 +43,108 @@
       @endrole
 
 
+      {{-- Untuk superAdmin --}}
+      @role('superAdmin')
       <div class="row">
-        <div class="col-lg-3 col-6">
-          <!-- small box -->
-          <div class="small-box bg-info">
-            <div class="inner">
-              <h3>150</h3>
-
-              <p>New Orders</p>
+          <div class="col-lg-3 col-6">
+            <div class="small-box bg-info">
+              <div class="inner">
+                <h3>{{ $totalUser }}</h3>
+                <p>Total User</p>
+              </div>
+              <div class="icon">
+                <i class="ion ion-person"></i>
+              </div>
+              <a href="#" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
             </div>
-            <div class="icon">
-              <i class="ion ion-bag"></i>
-            </div>
-            <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
           </div>
-        </div>
-        <!-- ./col -->
-        <div class="col-lg-3 col-6">
-          <!-- small box -->
-          <div class="small-box bg-success">
-            <div class="inner">
-              <h3>53<sup style="font-size: 20px">%</sup></h3>
 
-              <p>Bounce Rate</p>
+          <div class="col-lg-3 col-6">
+            <div class="small-box bg-success">
+              <div class="inner">
+                <h3>{{ $totalWajibPajak }}</h3>
+                <p>Total Data Pajak</p>
+              </div>
+              <div class="icon">
+                <i class="ion ion-document-text"></i>
+              </div>
+              <a href="#" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
             </div>
-            <div class="icon">
-              <i class="ion ion-stats-bars"></i>
-            </div>
-            <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
           </div>
-        </div>
-        <!-- ./col -->
-        <div class="col-lg-3 col-6">
-          <!-- small box -->
-          <div class="small-box bg-warning">
-            <div class="inner">
-              <h3>44</h3>
 
-              <p>User Registrations</p>
+          <div class="col-lg-3 col-6">
+            <div class="small-box bg-warning">
+              <div class="inner">
+                <h3>Rp{{ number_format($totalHariIni, 0, ',', '.') }}</h3>
+                <p>Uang Masuk Hari Ini</p>
+              </div>
+              <div class="icon">
+                <i class="ion ion-cash"></i>
+              </div>
+              <a href="#" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
             </div>
-            <div class="icon">
-              <i class="ion ion-person-add"></i>
-            </div>
-            <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
           </div>
-        </div>
-        <!-- ./col -->
-        <div class="col-lg-3 col-6">
-          <!-- small box -->
-          <div class="small-box bg-danger">
-            <div class="inner">
-              <h3>65</h3>
 
-              <p>Unique Visitors</p>
+          <div class="col-lg-3 col-6">
+            <div class="small-box bg-danger">
+              <div class="inner">
+                <h3>Rp{{ number_format($totalKeseluruhan, 0, ',', '.') }}</h3>
+                <p>Total Uang Masuk</p>
+              </div>
+              <div class="icon">
+                <i class="ion ion-stats-bars"></i>
+              </div>
+              <a href="#" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
             </div>
-            <div class="icon">
-              <i class="ion ion-pie-graph"></i>
-            </div>
-            <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
           </div>
-        </div>
-        <!-- ./col -->
       </div>
+      @endrole
+
+      {{-- Untuk warga --}}
+      @role('warga')
+      <div class="row">
+          <div class="col-lg-4 col-6">
+              <div class="small-box bg-primary">
+                  <div class="inner">
+                      <h3>{{ $nopSubscribed }}</h3>
+                      <p>NOP yang Disubscribe</p>
+                  </div>
+                  <div class="icon">
+                      <i class="ion ion-home"></i>
+                  </div>
+                  <a href="#" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
+              </div>
+          </div>
+
+          <div class="col-lg-4 col-6">
+              <div class="small-box bg-success">
+                  <div class="inner">
+                      <h3>{{ $jumlahSudahBayar }}</h3>
+                      <p>Tagihan Sudah Dibayar</p>
+                  </div>
+                  <div class="icon">
+                      <i class="ion ion-checkmark-circled"></i>
+                  </div>
+                  <a href="#" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
+              </div>
+          </div>
+
+          <div class="col-lg-4 col-6">
+              <div class="small-box bg-danger">
+                  <div class="inner">
+                      <h3>{{ $jumlahBelumBayar }}</h3>
+                      <p>Tagihan Belum Dibayar</p>
+                  </div>
+                  <div class="icon">
+                      <i class="ion ion-close-circled"></i>
+                  </div>
+                  <a href="#" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
+              </div>
+          </div>
+      </div>
+      @endrole
+
+
     </div>
   </section>
 

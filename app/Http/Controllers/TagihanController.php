@@ -195,8 +195,8 @@ class TagihanController extends Controller
 
     public function datatable(Request $request)
     {
-        $user = auth()->user();
-        $nop = $request->nop;
+        $user = Auth::user();
+        $nop = $request->nop; // ambil NOP dari request
 
         if ($user->hasRole('superAdmin')) {
             if (strlen($nop) !== 18) {

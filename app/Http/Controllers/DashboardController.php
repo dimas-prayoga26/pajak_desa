@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+use App\Models\User;
+use App\Models\Tagihan;
 use App\Models\WajibPajak;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -11,16 +14,56 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        return view('dashboard.index'); // View untuk form login
+        $user = Auth::user();
+        $isWarga = $user->hasRole('warga');
+
+
+
+        $totalUser = User::count();
+        $totalWajibPajak = WajibPajak::count();
+        $totalHariIni = Tagihan::where('status_bayar', 'dikonfirmasi')
+            ->whereDate('updated_at', Carbon::today())
+            ->sum('jumlah');
+        $totalKeseluruhan = Tagihan::where('status_bayar', 'dikonfirmasi')->sum('jumlah');
+
+        if ($isWarga) {
+
+            $wajibPajakQuery = WajibPajak::where('user_id', $user->id);
+            $nopSubscribed = $wajibPajakQuery->count();
+
+
+            $tagihanQuery = Tagihan::whereIn('wajib_pajak_id', $wajibPajakQuery->pluck('id'));
+
+            $jumlahSudahBayar = $tagihanQuery
+            ->whereIn('status_bayar', ['dibayar', 'dikonfirmasi'])
+            ->count();
+
+            $jumlahBelumBayar = $tagihanQuery->where('status_bayar', 'belum')->count();
+        } else {
+
+            $nopSubscribed = WajibPajak::count();
+            $jumlahSudahBayar = Tagihan::where('status_bayar', 'dibayar')->count();
+            $jumlahBelumBayar = Tagihan::where('status_bayar', 'belum')->count();
+        }
+
+        return view('dashboard.index', compact(
+            'totalUser',
+            'totalWajibPajak',
+            'totalHariIni',
+            'totalKeseluruhan',
+            'nopSubscribed',
+            'jumlahSudahBayar',
+            'jumlahBelumBayar'
+        ));
     }
 
     public function searchNop(Request $request)
     {
         $query = $request->nop;
 
-        
+
         $results = WajibPajak::where('nop', 'like', '%' . $query . '%')->get();
-        
+
         return response()->json($results);
     }
 
@@ -54,7 +97,7 @@ class DashboardController extends Controller
                 $pajak->user_id = auth()->id();
             }
 
-            // dd(auth()->id());
+
             if ($request->mode === 'unsubscribe') {
                 if ((int)$pajak->user_id !== (int)auth()->id()) {
                     return response()->json([

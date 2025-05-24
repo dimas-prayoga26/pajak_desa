@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\Tagihan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HistoryTagihanController extends Controller
 {
@@ -66,14 +67,24 @@ class HistoryTagihanController extends Controller
 
     public function datatable(Request $request)
     {
+        $user = Auth::user();
         $query = Tagihan::with(['wajibPajak.user.biodata'])
-            ->whereHas('wajibPajak', function($q) {
-                $q->whereNotNull('user_id');
-            })
-            ->whereIn('status_bayar', ['dibayar', 'dikonfirmasi']);
+            ->whereHas('wajibPajak', function ($q) use ($user) {
+                if (($user->hasRole('warga'))) {
+                    $q->where('user_id', $user->id);
+                } else {
+                    $q->whereNotNull('user_id');
+                }
+            })->whereIn('status_bayar', ['dibayar', 'dikonfirmasi']);
+        // dd($user->id);
+        if (($user->hasRole('warga'))) {
+            $query->whereHas('wajibPajak', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        }
 
-            if ($request->filled('daterange')) {
-                $dates = explode(' to ', $request->daterange);
+        if ($request->filled('daterange')) {
+            $dates = explode(' to ', $request->daterange);
 
             if (count($dates) === 2) {
                 $start = Carbon::parse($dates[0])->startOfDay();
@@ -85,26 +96,25 @@ class HistoryTagihanController extends Controller
 
 
         return datatables()->of($query->get())
-        ->addColumn('tanggal', function ($row) {
-            return $row->updated_at->format('d-m-Y'); // hanya tanggal
-        })
-        ->addColumn('waktu', function ($row) {
-            return $row->updated_at->format('H:i'); // hanya jam:menit
-        })
-        ->addColumn('nama', function ($row) {
-            return optional($row->wajibPajak->user->biodata)->nama ?? '-';
-        })
-        ->addColumn('nop', function ($row) {
-            return optional($row->wajibPajak)->nop ?? '-';
-        })
-        ->addColumn('tahun', function ($row) {
-            return $row->tahun;
-        })
-        ->addColumn('total', function ($row) {
-            return $row->jumlah;
-        })
-        ->make(true);
-
+            ->addColumn('tanggal', function ($row) {
+                return $row->updated_at->format('d-m-Y');
+            })
+            ->addColumn('waktu', function ($row) {
+                return $row->updated_at->format('H:i');
+            })
+            ->addColumn('nama', function ($row) {
+                return optional($row->wajibPajak->user->biodata)->nama ?? '-';
+            })
+            ->addColumn('nop', function ($row) {
+                return optional($row->wajibPajak)->nop ?? '-';
+            })
+            ->addColumn('tahun', function ($row) {
+                return $row->tahun;
+            })
+            ->addColumn('total', function ($row) {
+                return $row->jumlah;
+            })
+            ->make(true);
     }
 
 
